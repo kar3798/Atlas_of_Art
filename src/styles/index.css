@@ -1,0 +1,30 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Palette: deep navy/charcoal with warm ivory and muted gold accents */
+  --color-ink: #0b0f1a;
+  --color-ink-soft: #141a2a;
+  --color-ivory: #f3ece0;
+  --color-ivory-muted: #b9b2a5;
+  --color-gold: #c9a96e;
+
+  /* Local font stacks only — no web font downloads */
+  --font-display:
+    'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
+    ui-serif, serif;
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink font-sans text-ivory antialiased;
+    color-scheme: dark;
+  }
+}

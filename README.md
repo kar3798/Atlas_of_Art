@@ -1,75 +1,48 @@
-# React + TypeScript + Vite
+# Atlas of Art
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An open-source educational web app for exploring artworks from around the world
+through an interactive 3D globe. The initial focus is Indian and Chinese
+sculpture and historical art, drawn from openly licensed museum collections.
 
-Currently, two official plugins are available:
+> Status: frontend foundation only. Museum data, region selection and artwork
+> details are not built yet.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Getting started
 
-## React Compiler
+Requires Node.js 20.19+ or 22.12+.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev      # start the dev server at http://localhost:5173
+npm run build    # type-check and build for production into dist/
+npm run preview  # serve the production build locally
+npm run lint     # run ESLint
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- [Vite](https://vite.dev/) + [React](https://react.dev/) + TypeScript
+- [Tailwind CSS v4](https://tailwindcss.com/) via `@tailwindcss/vite`
+- [react-globe.gl](https://github.com/vasturiano/react-globe.gl) (three.js) for the globe
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project structure
 
 ```
+src/
+  components/   UI components (Header, Footer, GlobeView)
+  lib/          Utilities and hooks
+  styles/       Global styles and Tailwind theme tokens
+public/
+  textures/     Locally served globe imagery
+```
+
+`types/` and `data/` directories will be added when artwork data is introduced.
+
+## Attribution
+
+- **Earth texture** (`public/textures/earth-blue-marble.jpg`): NASA Blue Marble
+  imagery, courtesy of NASA Earth Observatory / Visible Earth. NASA imagery is
+  generally not subject to copyright in the United States
+  ([NASA media usage guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/)).
+  This copy is redistributed from the
+  [three-globe](https://github.com/vasturiano/three-globe) examples (MIT License).
