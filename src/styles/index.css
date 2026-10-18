@@ -28,3 +28,18 @@
     color-scheme: dark;
   }
 }
+
+/* Country hover tooltip. Overrides the default styling of globe.gl's tooltip container. */
+:root .float-tooltip-kap {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.globe-tooltip {
+  @apply rounded-md border border-gold/30 bg-ink/85 px-3 py-1.5 font-sans text-xs tracking-wide text-ivory backdrop-blur-sm;
+}
+
+.globe-tooltip-hint {
+  @apply mt-0.5 block text-[0.65rem] tracking-[0.15em] text-gold uppercase;
+}
