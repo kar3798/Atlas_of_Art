@@ -1,0 +1,329 @@
+{
+  "source": "https://openaccess-api.clevelandart.org/api/artworks",
+  "retrievedAt": "2026-10-18",
+  "artworks": [
+    {
+      "id": "cma-111811",
+      "title": "Nataraja, Shiva as the Lord of Dance",
+      "creator": null,
+      "date": {
+        "display": "1000s",
+        "earliest": 1000,
+        "latest": 1099
+      },
+      "type": "Sculpture",
+      "medium": "Bronze",
+      "culture": "South India, Tamil Nadu, Chola period (900–1200s)",
+      "origin": {
+        "country": "IND",
+        "place": "Tamil Nadu",
+        "historicalRegion": null,
+        "relationship": "attributed",
+        "certainty": "stated",
+        "evidence": {
+          "field": "culture",
+          "text": "South India, Tamil Nadu, Chola period (900–1200s)"
+        }
+      },
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1930.331/1930.331_web.jpg",
+        "width": 714,
+        "height": 893,
+        "license": "CC0"
+      },
+      "description": [
+        "One of the most celebrated sculptural forms in the history of Indian art, this elegant and dynamic figure embodies some of Hinduism’s most fundamental tenets. According to Hindu thought, time is cyclical; the world is created, maintained, preserved for a time, then destroyed, only to be created again an infinite number of times. For those Hindus who view Shiva to be the all-powerful creator divinity, he is responsible for both creation and destruction. The ring of fire and the tongue of flame he holds in his left hand refer to destruction, and the drum in his raised right hand refers to the relentless beat of time as it moves inevitably forward. His lower right hand, held up with the palm facing out, signals to his devotees not to be afraid of the impending destruction; they can be liberated from the cycles of birth and death through devotion to him, which he indicates by pointing to his upraised foot. With every step in his dance, he lands on a dwarfish figure personifying ignorance."
+      ],
+      "source": {
+        "museum": "The Cleveland Museum of Art",
+        "accessionNumber": "1930.331",
+        "recordUrl": "https://clevelandart.org/art/1930.331",
+        "apiUrl": "https://openaccess-api.clevelandart.org/api/artworks/1930.331",
+        "creditLine": "Purchase from the J. H. Wade Fund"
+      }
+    },
+    {
+      "id": "cma-145408",
+      "title": "Seated Shakyamuni Buddha",
+      "creator": null,
+      "date": {
+        "display": "c. 120 CE",
+        "earliest": 80,
+        "latest": 135
+      },
+      "type": "Sculpture",
+      "medium": "red mottled sandstone",
+      "culture": "Northern India, Uttar Pradesh, Mathura, Kushan period",
+      "origin": {
+        "country": "IND",
+        "place": "Mathura, Uttar Pradesh",
+        "historicalRegion": null,
+        "relationship": "attributed",
+        "certainty": "stated",
+        "evidence": {
+          "field": "culture",
+          "text": "Northern India, Uttar Pradesh, Mathura, Kushan period"
+        }
+      },
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1970.63/1970.63_web.jpg",
+        "width": 720,
+        "height": 900,
+        "license": "CC0"
+      },
+      "description": [
+        "This early form of the Buddha image depicts him seated on an altar under the Bodhi tree. A coiled topknot of hair and elongated earlobes refer to his life as a prince when he wore a turban and heavy earrings. Behind his head is a solar disk, like a halo, and lions on the throne indicate the spreading of his teachings in all four directions."
+      ],
+      "source": {
+        "museum": "The Cleveland Museum of Art",
+        "accessionNumber": "1970.63",
+        "recordUrl": "https://clevelandart.org/art/1970.63",
+        "apiUrl": "https://openaccess-api.clevelandart.org/api/artworks/1970.63",
+        "creditLine": "Purchase from the J. H. Wade Fund"
+      }
+    },
+    {
+      "id": "cma-114974",
+      "title": "Buddha Calling on Earth to Witness",
+      "creator": null,
+      "date": {
+        "display": "800s",
+        "earliest": 800,
+        "latest": 899
+      },
+      "type": "Sculpture",
+      "medium": "chloritic schist",
+      "culture": "Northeastern India, Bihar, Tetravan, Pala Period (750-1197)",
+      "origin": {
+        "country": "IND",
+        "place": "Tetravan, Bihar",
+        "historicalRegion": null,
+        "relationship": "attributed",
+        "certainty": "stated",
+        "evidence": {
+          "field": "culture",
+          "text": "Northeastern India, Bihar, Tetravan, Pala Period (750-1197)"
+        }
+      },
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1935.146/1935.146_web.jpg",
+        "width": 593,
+        "height": 893,
+        "license": "CC0"
+      },
+      "description": [
+        "This sculpture is one of a series that depict the Buddha at different scenes in his life. Here, he is at Bodhgaya, the place where he achieved enlightenment. At the top of the composition are the branches of the ficus tree with its heart-shaped leaves, under which he achieved enlightenment. His hand gesture indicates that he is calling upon the goddess of the earth to witness the moment. During the Pala period of the eighth through 12th centuries in medieval India, Buddhism dominated and flourished in major monastic universities. After the fall of the Pala dynasty, the numerous battles between small kingdoms vying for power caused the destruction of the Buddhist monasteries, and Buddhist monks fled with texts and movable art to Nepal, Tibet, and Southeast Asia, so that by the 14th century, Buddhism was eradicated in India."
+      ],
+      "source": {
+        "museum": "The Cleveland Museum of Art",
+        "accessionNumber": "1935.146",
+        "recordUrl": "https://clevelandart.org/art/1935.146",
+        "apiUrl": "https://openaccess-api.clevelandart.org/api/artworks/1935.146",
+        "creditLine": "Dudley P. Allen Fund"
+      }
+    },
+    {
+      "id": "cma-137128",
+      "title": "Dancing Ganesha",
+      "creator": null,
+      "date": {
+        "display": "c. 1000",
+        "earliest": 990,
+        "latest": 1100
+      },
+      "type": "Sculpture",
+      "medium": "sandstone",
+      "culture": "Central India, Madhya Pradesh",
+      "origin": {
+        "country": "IND",
+        "place": "Madhya Pradesh",
+        "historicalRegion": null,
+        "relationship": "attributed",
+        "certainty": "stated",
+        "evidence": {
+          "field": "culture",
+          "text": "Central India, Madhya Pradesh"
+        }
+      },
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1961.93/1961.93_web.jpg",
+        "width": 678,
+        "height": 893,
+        "license": "CC0"
+      },
+      "description": [
+        "The name Ganesha means \"lord (isha) of the demonic dwarfs (gana),\" part of Shiva's entourage. They dance and imitate Shiva in humorous ways that inspire his followers' affection. In this sculpture Ganesha's dance mimics the dance of Shiva. Ganesha has six arms instead of four, and he holds a bowl of sweet cakes and a radish instead of a tongue of flame."
+      ],
+      "source": {
+        "museum": "The Cleveland Museum of Art",
+        "accessionNumber": "1961.93",
+        "recordUrl": "https://clevelandart.org/art/1961.93",
+        "apiUrl": "https://openaccess-api.clevelandart.org/api/artworks/1961.93",
+        "creditLine": "John L. Severance Fund"
+      }
+    },
+    {
+      "id": "cma-93992",
+      "title": "Stele with Sakyamuni and Bodhisattvas",
+      "creator": null,
+      "date": {
+        "display": "537",
+        "earliest": 537,
+        "latest": 537
+      },
+      "type": "Sculpture",
+      "medium": "limestone",
+      "culture": "China, Hebei province, Eastern Wei dynasty (534-550)",
+      "origin": {
+        "country": "CHN",
+        "place": "Hebei province",
+        "historicalRegion": null,
+        "relationship": "attributed",
+        "certainty": "stated",
+        "evidence": {
+          "field": "culture",
+          "text": "China, Hebei province, Eastern Wei dynasty (534-550)"
+        }
+      },
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1914.567/1914.567_web.jpg",
+        "width": 635,
+        "height": 893,
+        "license": "CC0"
+      },
+      "description": [
+        "According to the inscription, this stele was commissioned in 537 by Yuan'ning, prince of the Gaoping branch of the imperial Wei family, in memory of his deceased consort, in the hope that it would bring her to the Western paradise. It was carved by one of the finest craftsmen in the Eastern Wei capital of Ye in Hebei province.",
+        "Here, the Buddha's robe shows a careful arrangement of patterned drapery (large U-shaped folds and scallop-shaped folds at the hem), combining linear rhythms with an ordered symmetry. Soaring flames edge the mandorla (almond-shaped halo), echoing the linear eloquence of Chinese painting."
+      ],
+      "source": {
+        "museum": "The Cleveland Museum of Art",
+        "accessionNumber": "1914.567",
+        "recordUrl": "https://clevelandart.org/art/1914.567",
+        "apiUrl": "https://openaccess-api.clevelandart.org/api/artworks/1914.567",
+        "creditLine": "Gift of the John Huntington Art and Polytechnic Trust"
+      }
+    },
+    {
+      "id": "cma-146721",
+      "title": "Standing Disciple Mahakasyapa Holding a Cylindrical Reliquary",
+      "creator": null,
+      "date": {
+        "display": "c. 550",
+        "earliest": 545,
+        "latest": 555
+      },
+      "type": "Sculpture",
+      "medium": "limestone with traces of pigment",
+      "culture": "China, Hebei province, Southern Xiangtangshan caves, Northern Qi dynasty (550-577)",
+      "origin": {
+        "country": "CHN",
+        "place": "Southern Xiangtangshan caves, Hebei province",
+        "historicalRegion": null,
+        "relationship": "attributed",
+        "certainty": "stated",
+        "evidence": {
+          "field": "culture",
+          "text": "China, Hebei province, Southern Xiangtangshan caves, Northern Qi dynasty (550-577)"
+        }
+      },
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1972.166/1972.166_web.jpg",
+        "width": 515,
+        "height": 893,
+        "license": "CC0"
+      },
+      "description": [
+        "Mahakasyapa, the disciple of Shakyamuni, is presented with closed eyes in an expression of meditative concentration. He is holding a reliquary for the Buddha’s ashes, which symbolize the Buddha entering final spiritual attainment (nirvana) at death. The artistic simplicity exemplifies the spiritual content of this figure."
+      ],
+      "source": {
+        "museum": "The Cleveland Museum of Art",
+        "accessionNumber": "1972.166",
+        "recordUrl": "https://clevelandart.org/art/1972.166",
+        "apiUrl": "https://openaccess-api.clevelandart.org/api/artworks/1972.166",
+        "creditLine": "Leonard C. Hanna Jr. Fund"
+      }
+    },
+    {
+      "id": "cma-132819",
+      "title": "Horse",
+      "creator": null,
+      "date": {
+        "display": "late 600s–800",
+        "earliest": 675,
+        "latest": 800
+      },
+      "type": "Sculpture",
+      "medium": "glazed earthenware, sancai (three-color) ware",
+      "culture": "China, probably Henan province, Tang dynasty (618–907)",
+      "origin": {
+        "country": "CHN",
+        "place": "Henan province",
+        "historicalRegion": null,
+        "relationship": "attributed",
+        "certainty": "probable",
+        "evidence": {
+          "field": "culture",
+          "text": "China, probably Henan province, Tang dynasty (618–907)"
+        }
+      },
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1955.295/1955.295_web.jpg",
+        "width": 947,
+        "height": 893,
+        "license": "CC0"
+      },
+      "description": [
+        "This ceramic horse was part of a set of figures depicting a procession, all of which was included in the tomb of a person of high rank. In ancient China tombs were equipped with all the items it was thought to be needed in the afterlife—including horses, as an essential mode of transportation."
+      ],
+      "source": {
+        "museum": "The Cleveland Museum of Art",
+        "accessionNumber": "1955.295",
+        "recordUrl": "https://clevelandart.org/art/1955.295",
+        "apiUrl": "https://openaccess-api.clevelandart.org/api/artworks/1955.295",
+        "creditLine": "Anonymous Gift"
+      }
+    },
+    {
+      "id": "cma-117940",
+      "title": "Cranes and Serpents",
+      "creator": null,
+      "date": {
+        "display": "475–221 BCE",
+        "earliest": -475,
+        "latest": -221
+      },
+      "type": "Sculpture",
+      "medium": "lacquered wood with polychromy",
+      "culture": "China, reportedly from Hunan province, Changsha, Warring States period (475–221 BCE), State of Chu (c. 1046–223 BCE)",
+      "origin": {
+        "country": "CHN",
+        "place": "Changsha, Hunan province",
+        "historicalRegion": "State of Chu",
+        "relationship": "attributed",
+        "certainty": "reported",
+        "evidence": {
+          "field": "culture",
+          "text": "China, reportedly from Hunan province, Changsha, Warring States period (475–221 BCE), State of Chu (c. 1046–223 BCE)"
+        }
+      },
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1938.9/1938.9_web.jpg",
+        "width": 770,
+        "height": 900,
+        "license": "CC0"
+      },
+      "description": [
+        "A different style of ritual art developed in the state of Chu in South China. In addition to bronze vessels, lacquered wood artifacts expanded the repertory of ritual implements.",
+        "This extraordinary sculpture was probably a drum stand for supporting a suspended drum in ritual ceremonies. It is unique among other excavated drum stands of the Chu, which typically show two birds standing on tigers. The theme of the bird stepping on the serpent was common in the Chu visual culture. Yet the slender proportions and seemingly flimsy structure of this particular set raise the question of whether it was utilitarian or mostly served symbolic functions in the tomb.",
+        "The birds' and serpents' bodies have designs painted in red lacquer and yellow pigment against the black lacquer. Scientific analyses confirm the additional use of a blue or green pigment that has been discolored over time."
+      ],
+      "source": {
+        "museum": "The Cleveland Museum of Art",
+        "accessionNumber": "1938.9",
+        "recordUrl": "https://clevelandart.org/art/1938.9",
+        "apiUrl": "https://openaccess-api.clevelandart.org/api/artworks/1938.9",
+        "creditLine": "Purchase from the J. H. Wade Fund"
+      }
+    }
+  ]
+}

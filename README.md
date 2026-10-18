@@ -4,8 +4,8 @@ An open-source educational web app for exploring artworks from around the world
 through an interactive 3D globe. The initial focus is Indian and Chinese
 sculpture and historical art, drawn from openly licensed museum collections.
 
-> Status: interactive globe with country selection for India and China.
-> Museum data and artwork details are not built yet.
+> Status: interactive globe with country selection for India and China, and a
+> small curated gallery of artworks from the Cleveland Museum of Art for each.
 
 ## Getting started
 
@@ -17,6 +17,7 @@ npm run dev      # start the dev server at http://localhost:5173
 npm run build    # type-check and build for production into dist/
 npm run preview  # serve the production build locally
 npm run lint     # run ESLint
+npm run data:artworks  # refresh the curated artwork dataset from the CMA API
 ```
 
 ## Tech stack
@@ -29,8 +30,8 @@ npm run lint     # run ESLint
 
 ```
 src/
-  components/   UI components (Header, Footer, GlobeView, CountryPicker, CountryPanel)
-  data/         Country boundaries and the list of selectable countries
+  components/   UI components (globe, country picker and panel, artwork cards and details)
+  data/         Country boundaries, selectable countries and the curated artwork dataset
   lib/          Utilities and hooks
   styles/       Global styles, Tailwind theme tokens and globe themes
   types/        Shared TypeScript types
@@ -65,6 +66,29 @@ Modern country borders are shown only as a navigational aid. Historical
 cultures and artistic traditions often do not correspond to present-day
 political boundaries, and some borders shown are disputed.
 
+### Artwork data
+
+Artworks come from the [Cleveland Museum of Art Open Access API](https://openaccess-api.clevelandart.org/)
+and are stored locally in `src/data/artworks.json`; the app makes no API calls
+at runtime (images load from the museum's CDN).
+
+The selection is curated by hand in `scripts/artwork-selection.json`: each
+entry gives an accession number, the modern country it is shown under, and how
+its origin is read from the museum record (place, historical region,
+relationship and certainty). `npm run data:artworks` fetches each record and
+writes the dataset only if every record:
+
+- has `share_license_status` of `CC0`, a web image, and an official
+  `clevelandart.org/art/…` record URL (both checked to be reachable);
+- supports the curated origin: the record's `culture` text must name the
+  country, every part of the place and any historical region, and must contain
+  the matching qualifier ("probably", "possibly", "reportedly") when the
+  certainty is not `stated`.
+
+Origins are never inferred from an artist's nationality or a work's subject.
+Records whose origin is not documented, or whose recorded region spans
+present-day borders (e.g. Kashmir, Bengal), are left out rather than guessed.
+
 ## Attribution
 
 - **Earth texture** (`public/textures/earth-blue-marble.jpg`): NASA Blue Marble
@@ -86,3 +110,7 @@ political boundaries, and some borders shown are disputed.
   `LABEL_X`, and coordinates rounded to 3 decimal places. Natural Earth depicts
   de facto boundaries; its depiction of disputed areas is not an endorsement by
   this project.
+- **Artwork data and images**: [The Cleveland Museum of Art](https://www.clevelandart.org/)
+  Open Access. Each included record and image is designated
+  [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) by the museum;
+  this is checked per record, since not all museum images share the same rights.

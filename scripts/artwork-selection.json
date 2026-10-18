@@ -1,0 +1,68 @@
+{
+  "artworks": [
+    {
+      "accessionNumber": "1930.331",
+      "country": "IND",
+      "place": "Tamil Nadu",
+      "historicalRegion": null,
+      "relationship": "attributed",
+      "certainty": "stated"
+    },
+    {
+      "accessionNumber": "1970.63",
+      "country": "IND",
+      "place": "Mathura, Uttar Pradesh",
+      "historicalRegion": null,
+      "relationship": "attributed",
+      "certainty": "stated"
+    },
+    {
+      "accessionNumber": "1935.146",
+      "country": "IND",
+      "place": "Tetravan, Bihar",
+      "historicalRegion": null,
+      "relationship": "attributed",
+      "certainty": "stated"
+    },
+    {
+      "accessionNumber": "1961.93",
+      "country": "IND",
+      "place": "Madhya Pradesh",
+      "historicalRegion": null,
+      "relationship": "attributed",
+      "certainty": "stated"
+    },
+    {
+      "accessionNumber": "1914.567",
+      "country": "CHN",
+      "place": "Hebei province",
+      "historicalRegion": null,
+      "relationship": "attributed",
+      "certainty": "stated"
+    },
+    {
+      "accessionNumber": "1972.166",
+      "country": "CHN",
+      "place": "Southern Xiangtangshan caves, Hebei province",
+      "historicalRegion": null,
+      "relationship": "attributed",
+      "certainty": "stated"
+    },
+    {
+      "accessionNumber": "1955.295",
+      "country": "CHN",
+      "place": "Henan province",
+      "historicalRegion": null,
+      "relationship": "attributed",
+      "certainty": "probable"
+    },
+    {
+      "accessionNumber": "1938.9",
+      "country": "CHN",
+      "place": "Changsha, Hunan province",
+      "historicalRegion": "State of Chu",
+      "relationship": "attributed",
+      "certainty": "reported"
+    }
+  ]
+}

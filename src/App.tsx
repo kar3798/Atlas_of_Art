@@ -4,6 +4,7 @@ import CountryPicker from './components/CountryPicker'
 import Footer from './components/Footer'
 import GlobeThemeSwitch from './components/GlobeThemeSwitch'
 import Header from './components/Header'
+import { getArtworksForCountry } from './data/artworks'
 import { getSelectableCountry } from './data/selectableCountries'
 import { countryOptionId } from './lib/elementIds'
 import { DEFAULT_GLOBE_THEME, GLOBE_THEMES, type GlobeThemeId } from './styles/globeThemes'
@@ -17,6 +18,7 @@ function App() {
   const [selection, setSelection] = useState<CountrySelection | null>(null)
   const globeTheme = GLOBE_THEMES[globeThemeId]
   const selectedId = selection?.countryId ?? null
+  const selectedCountry = selectedId ? getSelectableCountry(selectedId) : null
 
   const selectCountry = useCallback((countryId: SelectableCountryId) => {
     setSelection({ countryId })
@@ -38,47 +40,59 @@ function App() {
 
   return (
     <div
-      className="relative flex h-dvh flex-col overflow-hidden"
+      className="flex h-dvh flex-col overflow-hidden lg:flex-row"
       style={{ background: globeTheme.pageBackground }}
     >
-      <main className="absolute inset-0">
-        <Suspense
-          fallback={
-            <p className="flex h-full items-center justify-center text-xs tracking-[0.3em] text-ivory-muted/60 uppercase">
-              Loading globe…
-            </p>
-          }
-        >
-          <GlobeView
-            theme={globeTheme}
-            selection={selection}
-            onSelect={selectCountry}
-          />
-        </Suspense>
-      </main>
+      {/* The globe stage shrinks when the gallery opens, so the globe re-centers beside it. */}
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        <main className="absolute inset-0">
+          <Suspense
+            fallback={
+              <p className="flex h-full items-center justify-center text-xs tracking-[0.3em] text-ivory-muted/60 uppercase">
+                Loading globe…
+              </p>
+            }
+          >
+            <GlobeView
+              theme={globeTheme}
+              selection={selection}
+              onSelect={selectCountry}
+            />
+          </Suspense>
+        </main>
 
-      {import.meta.env.DEV && (
-        <div className="absolute top-3 right-3 z-20">
-          <GlobeThemeSwitch themeId={globeThemeId} onChange={setGlobeThemeId} />
+        {import.meta.env.DEV && (
+          <div className="absolute top-3 right-3 z-20">
+            <GlobeThemeSwitch themeId={globeThemeId} onChange={setGlobeThemeId} />
+          </div>
+        )}
+
+        {/* Overlays let pointer events pass through to the globe beneath. */}
+        <div className="relative z-10">
+          <Header />
         </div>
+        <div
+          className={`pointer-events-none relative z-10 mt-auto flex flex-col items-center gap-4 px-4 pt-4 ${
+            selectedCountry ? 'max-lg:pb-4' : ''
+          }`}
+        >
+          <CountryPicker selectedId={selectedId} onSelect={selectCountry} />
+          {/* On mobile the gallery sits below, so the footer gives way to it. */}
+          <div className={selectedCountry ? 'max-lg:hidden' : undefined}>
+            <Footer />
+          </div>
+        </div>
+      </div>
+
+      {selectedCountry && (
+        <CountryPanel key={selectedCountry.id} country={selectedCountry} onClear={clearSelection} />
       )}
 
-      {/* Overlays let pointer events pass through to the globe beneath. */}
-      <div className="relative z-10">
-        <Header />
-      </div>
-      <div className="pointer-events-none relative z-10 mt-auto flex flex-col items-center gap-4 px-4 pt-4">
-        <div aria-live="polite" className="flex w-full justify-center">
-          {selectedId && (
-            <CountryPanel
-              country={getSelectableCountry(selectedId)}
-              onClear={clearSelection}
-            />
-          )}
-        </div>
-        <CountryPicker selectedId={selectedId} onSelect={selectCountry} />
-        <Footer />
-      </div>
+      <p aria-live="polite" className="sr-only">
+        {selectedCountry
+          ? `${selectedCountry.name} selected. ${getArtworksForCountry(selectedCountry.id).length} artworks.`
+          : ''}
+      </p>
     </div>
   )
 }
