@@ -1,15 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Globe, { type GlobeMethods } from 'react-globe.gl'
+import {
+  AmbientLight,
+  DirectionalLight,
+  MeshPhongMaterial,
+  type Material,
+  type Object3D,
+} from 'three'
 import { COUNTRY_FEATURES, getCountryFeature } from '../data/countryBoundaries'
 import { isSelectableCountry } from '../data/selectableCountries'
+import { createGraticule, type GraticuleLine } from '../lib/graticule'
 import { useElementSize } from '../lib/useElementSize'
+import type { GlobeTheme } from '../styles/globeThemes'
 import type {
   CountryFeature,
   CountrySelection,
   SelectableCountryId,
 } from '../types/country'
-
-const EARTH_TEXTURE = '/textures/earth-blue-marble.jpg'
 
 // Globe radius is 100 scene units; these bound the camera distance from the center.
 const MIN_DISTANCE = 140
@@ -24,15 +31,51 @@ const INITIAL_VIEW = { lat: 24, lng: 88, altitude: 2.4 }
 const FOCUS_ALTITUDE = 1.8
 const FOCUS_TRANSITION_MS = 1200
 
-// Theme colors as RGB triplets so opacity can vary per state.
-const GOLD = '201, 169, 110'
-const IVORY = '243, 236, 224'
 const TRANSPARENT = 'rgba(0, 0, 0, 0)'
 
+// Just above unhighlighted country polygons (altitude 0.005) so lines aren't hidden by them.
+const GRATICULE_ALTITUDE = 0.006
+
 interface GlobeViewProps {
+  theme: GlobeTheme
   selection: CountrySelection | null
   onSelect: (id: SelectableCountryId) => void
 }
+
+/** Recolors globe.gl's default ambient and directional lights to match the theme. */
+function applyLights(globe: GlobeMethods, { lights }: GlobeTheme) {
+  for (const light of globe.lights()) {
+    if (light instanceof AmbientLight) {
+      light.color.set(lights.ambientColor)
+      light.intensity = lights.ambientIntensity
+    } else if (light instanceof DirectionalLight) {
+      light.color.set(lights.directionalColor)
+      light.intensity = lights.directionalIntensity
+    }
+  }
+}
+
+// One material per theme, created on first use and reused across theme switches.
+const varnishMaterials = new WeakMap<GlobeTheme, Material>()
+
+/** The theme's globe material, or `null` to restore globe.gl's default material. */
+function globeMaterialFor(theme: GlobeTheme): Material | null {
+  if (!theme.varnish) return null
+  let material = varnishMaterials.get(theme)
+  if (!material) {
+    material = new MeshPhongMaterial({
+      color: 0x000000, // Matches globe.gl's default; replaced by the texture once loaded.
+      specular: theme.varnish.specularColor,
+      shininess: theme.varnish.shininess,
+    })
+    varnishMaterials.set(theme, material)
+  }
+  return material
+}
+
+// Graticule lines are decorative and must not intercept country hover or clicks.
+const isInteractive = (obj: Object3D) =>
+  (obj as Object3D & { __globeObjType?: string }).__globeObjType !== 'path'
 
 const asCountry = (obj: object) => obj as CountryFeature
 
@@ -44,7 +87,7 @@ function countryTooltip(obj: object) {
   return `<div class="globe-tooltip">${name}${hint}</div>`
 }
 
-export default function GlobeView({ selection, onSelect }: GlobeViewProps) {
+export default function GlobeView({ theme, selection, onSelect }: GlobeViewProps) {
   const [containerRef, { width, height }] = useElementSize<HTMLDivElement>()
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const resumeTimer = useRef<number | undefined>(undefined)
@@ -80,9 +123,15 @@ export default function GlobeView({ selection, onSelect }: GlobeViewProps) {
     if (selection) focusCountry(selection.countryId)
   }, [selection, updateAutoRotate, focusCountry])
 
+  useEffect(() => {
+    if (globeRef.current) applyLights(globeRef.current, theme)
+  }, [theme])
+
   const handleGlobeReady = () => {
     const globe = globeRef.current
     if (!globe) return
+
+    applyLights(globe, theme)
 
     const controls = globe.controls()
     controls.enableDamping = true
@@ -111,30 +160,47 @@ export default function GlobeView({ selection, onSelect }: GlobeViewProps) {
     updateAutoRotate()
   }
 
+  const colors = theme.countries
+
+  const graticuleStyle = theme.graticule
+  const graticule = useMemo(
+    () => (graticuleStyle ? createGraticule(graticuleStyle.step) : []),
+    [graticuleStyle],
+  )
+  const graticuleColor = useCallback(
+    (obj: object) => {
+      if (!graticuleStyle) return TRANSPARENT
+      return (obj as GraticuleLine).isEquator
+        ? graticuleStyle.equatorColor
+        : graticuleStyle.color
+    },
+    [graticuleStyle],
+  )
+
   const capColor = useCallback(
     (obj: object) => {
       const country = asCountry(obj)
       const { id } = country.properties
-      if (id === selectedId) return `rgba(${GOLD}, 0.38)`
+      if (id === selectedId) return colors.selectedFill
       if (country !== hovered) return TRANSPARENT
-      return isSelectableCountry(id) ? `rgba(${GOLD}, 0.22)` : `rgba(${IVORY}, 0.1)`
+      return isSelectableCountry(id) ? colors.selectableHoverFill : colors.hoverFill
     },
-    [selectedId, hovered],
+    [selectedId, hovered, colors],
   )
 
   const sideColor = useCallback(
     (obj: object) =>
-      asCountry(obj).properties.id === selectedId ? `rgba(${GOLD}, 0.25)` : TRANSPARENT,
-    [selectedId],
+      asCountry(obj).properties.id === selectedId ? colors.selectedSide : TRANSPARENT,
+    [selectedId, colors],
   )
 
   const strokeColor = useCallback(
     (obj: object) => {
       const { id } = asCountry(obj).properties
-      if (id === selectedId) return `rgba(${GOLD}, 0.95)`
-      return isSelectableCountry(id) ? `rgba(${GOLD}, 0.55)` : `rgba(${IVORY}, 0.22)`
+      if (id === selectedId) return colors.selectedStroke
+      return isSelectableCountry(id) ? colors.selectableStroke : colors.stroke
     },
-    [selectedId],
+    [selectedId, colors],
   )
 
   const altitude = useCallback(
@@ -164,10 +230,12 @@ export default function GlobeView({ selection, onSelect }: GlobeViewProps) {
           width={width}
           height={height}
           backgroundColor="rgba(0, 0, 0, 0)"
-          globeImageUrl={EARTH_TEXTURE}
+          globeImageUrl={theme.textureUrl}
+          // null (not undefined) is what tells globe.gl to restore its default material.
+          globeMaterial={globeMaterialFor(theme) as Material}
           showAtmosphere
-          atmosphereColor="#e9d8b4"
-          atmosphereAltitude={0.16}
+          atmosphereColor={theme.atmosphere.color}
+          atmosphereAltitude={theme.atmosphere.altitude}
           onGlobeReady={handleGlobeReady}
           polygonsData={COUNTRY_FEATURES}
           polygonCapColor={capColor}
@@ -181,6 +249,12 @@ export default function GlobeView({ selection, onSelect }: GlobeViewProps) {
           showPointerCursor={(type, obj) =>
             type === 'polygon' && isSelectableCountry(asCountry(obj).properties.id)
           }
+          pathsData={graticule}
+          pathPoints="points"
+          pathColor={graticuleColor}
+          pathPointAlt={GRATICULE_ALTITUDE}
+          pathTransitionDuration={0}
+          pointerEventsFilter={isInteractive}
         />
       )}
     </div>

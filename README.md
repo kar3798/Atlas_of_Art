@@ -32,11 +32,30 @@ src/
   components/   UI components (Header, Footer, GlobeView, CountryPicker, CountryPanel)
   data/         Country boundaries and the list of selectable countries
   lib/          Utilities and hooks
-  styles/       Global styles and Tailwind theme tokens
+  styles/       Global styles, Tailwind theme tokens and globe themes
   types/        Shared TypeScript types
 public/
   textures/     Locally served globe imagery
+scripts/        Asset build scripts (not part of the app bundle)
 ```
+
+### Globe styles
+
+Globe appearance (texture, atmosphere, lighting and country colors) is defined
+in `src/styles/globeThemes.ts`; interaction logic is shared. Two styles exist:
+**Realistic** (default) and an experimental **Antique** parchment style. In
+development (`npm run dev`) a small switch in the top-right corner toggles
+between them; it is not included in production builds.
+
+The antique texture is generated from Natural Earth II imagery:
+
+```bash
+curl -LO https://naciscdn.org/naturalearth/50m/raster/NE2_50M_SR_W.zip
+unzip NE2_50M_SR_W.zip
+python3 scripts/build-antique-texture.py NE2_50M_SR_W/NE2_50M_SR_W.tif public/textures/earth-antique.jpg
+```
+
+This requires Python 3 with Pillow. The 175 MB source image is not committed.
 
 To make another country selectable, add its Natural Earth `ADM0_A3` code to
 `SelectableCountryId` in `src/types/country.ts` and an entry to
@@ -54,6 +73,11 @@ political boundaries, and some borders shown are disputed.
   ([NASA media usage guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/)).
   This copy is redistributed from the
   [three-globe](https://github.com/vasturiano/three-globe) examples (MIT License).
+- **Antique Earth texture** (`public/textures/earth-antique.jpg`): derived from
+  [Natural Earth II with Shaded Relief and Water](https://www.naturalearthdata.com/downloads/50m-raster-data/50m-natural-earth-2/),
+  1:50m (public domain), by Tom Patterson. Recolored to a sepia palette, with
+  ink coastlines and procedurally generated paper aging added, and resized to
+  4096×2048 with `scripts/build-antique-texture.py`.
 - **Country boundaries** (`src/data/ne_110m_admin_0_countries.json`): derived
   from [Natural Earth](https://www.naturalearthdata.com/) 1:110m Admin 0 –
   Countries, v5.1.2 (public domain), via

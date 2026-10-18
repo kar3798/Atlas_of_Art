@@ -2,15 +2,18 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import CountryPanel from './components/CountryPanel'
 import CountryPicker from './components/CountryPicker'
 import Footer from './components/Footer'
+import GlobeThemeSwitch from './components/GlobeThemeSwitch'
 import Header from './components/Header'
 import { getSelectableCountry } from './data/selectableCountries'
 import { countryOptionId } from './lib/elementIds'
+import { DEFAULT_GLOBE_THEME, GLOBE_THEMES, type GlobeThemeId } from './styles/globeThemes'
 import type { CountrySelection, SelectableCountryId } from './types/country'
 
 // three.js is large, so the globe loads in its own chunk after the page shell renders.
 const GlobeView = lazy(() => import('./components/GlobeView'))
 
 function App() {
+  const [globeThemeId, setGlobeThemeId] = useState<GlobeThemeId>(DEFAULT_GLOBE_THEME)
   const [selection, setSelection] = useState<CountrySelection | null>(null)
   const selectedId = selection?.countryId ?? null
 
@@ -42,9 +45,19 @@ function App() {
             </p>
           }
         >
-          <GlobeView selection={selection} onSelect={selectCountry} />
+          <GlobeView
+            theme={GLOBE_THEMES[globeThemeId]}
+            selection={selection}
+            onSelect={selectCountry}
+          />
         </Suspense>
       </main>
+
+      {import.meta.env.DEV && (
+        <div className="absolute top-3 right-3 z-20">
+          <GlobeThemeSwitch themeId={globeThemeId} onChange={setGlobeThemeId} />
+        </div>
+      )}
 
       {/* Overlays let pointer events pass through to the globe beneath. */}
       <div className="relative z-10">
