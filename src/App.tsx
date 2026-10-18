@@ -15,6 +15,7 @@ const GlobeView = lazy(() => import('./components/GlobeView'))
 function App() {
   const [globeThemeId, setGlobeThemeId] = useState<GlobeThemeId>(DEFAULT_GLOBE_THEME)
   const [selection, setSelection] = useState<CountrySelection | null>(null)
+  const globeTheme = GLOBE_THEMES[globeThemeId]
   const selectedId = selection?.countryId ?? null
 
   const selectCountry = useCallback((countryId: SelectableCountryId) => {
@@ -36,7 +37,10 @@ function App() {
   }, [selectedId, clearSelection])
 
   return (
-    <div className="relative flex h-dvh flex-col overflow-hidden bg-[radial-gradient(ellipse_at_center,var(--color-ink-soft)_0%,var(--color-ink)_70%)]">
+    <div
+      className="relative flex h-dvh flex-col overflow-hidden"
+      style={{ background: globeTheme.pageBackground }}
+    >
       <main className="absolute inset-0">
         <Suspense
           fallback={
@@ -46,7 +50,7 @@ function App() {
           }
         >
           <GlobeView
-            theme={GLOBE_THEMES[globeThemeId]}
+            theme={globeTheme}
             selection={selection}
             onSelect={selectCountry}
           />

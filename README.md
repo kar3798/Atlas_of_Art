@@ -76,8 +76,8 @@ political boundaries, and some borders shown are disputed.
 - **Antique Earth texture** (`public/textures/earth-antique.jpg`): derived from
   [Natural Earth II with Shaded Relief and Water](https://www.naturalearthdata.com/downloads/50m-raster-data/50m-natural-earth-2/),
   1:50m (public domain), by Tom Patterson. Recolored to a sepia palette, with
-  ink coastlines and procedurally generated paper aging added, and resized to
-  4096×2048 with `scripts/build-antique-texture.py`.
+  ink coastlines, water-lining, and procedurally generated paper aging and grain
+  added, and resized to 4096×2048 with `scripts/build-antique-texture.py`.
 - **Country boundaries** (`src/data/ne_110m_admin_0_countries.json`): derived
   from [Natural Earth](https://www.naturalearthdata.com/) 1:110m Admin 0 –
   Countries, v5.1.2 (public domain), via

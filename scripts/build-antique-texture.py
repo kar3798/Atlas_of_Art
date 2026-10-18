@@ -29,9 +29,9 @@ WATER_THRESHOLD = 50
 LAND = dict(black=(70, 50, 30), mid=(176, 146, 98), white=(240, 226, 192))
 LAND_POINTS = dict(blackpoint=70, midpoint=175, whitepoint=245)
 
-# Oceans are a darker, low-contrast warm tone so continents read clearly and
-# the source's sea-floor relief stays a faint texture rather than noise.
-OCEAN = dict(black=(122, 102, 72), white=(178, 156, 114))
+# Oceans are a darker, low-contrast tone with a faint grey-green wash, as on
+# hand-colored globes. The source's sea-floor relief stays a faint texture.
+OCEAN = dict(black=(116, 105, 80), white=(176, 161, 124))
 OCEAN_POINTS = dict(blackpoint=40, whitepoint=230)
 
 # A soft ink wash along coastlines, as on hand-colored globes.
@@ -41,6 +41,15 @@ COAST_WASH_STRENGTH = 0.22
 # Fine engraved coastline: a thin dark-ink line traced at full source resolution.
 COAST_INK = (58, 40, 24)
 COAST_INK_OPACITY = 0.7
+
+# Water-lining: faint engraved lines following the coast out to sea. Distances
+# are in output pixels (~11 px per degree); farther lines are fainter.
+WATERLINES = ((5, 0.32), (10, 0.22), (16, 0.13))
+WATERLINE_SUPERSAMPLE = 2  # Drawn at 2x and downsampled for smooth, thin lines.
+
+# Paper grain: very fine fibres, only visible up close. Max darkening out of 255.
+GRAIN_SEED = 1743
+GRAIN_STRENGTH = 12
 
 # Paper aging: soft, low-frequency variation in parchment tone. Computed on the
 # sphere (not the flat map) so it has no seam at ±180° and no pinching at the poles.
@@ -80,6 +89,39 @@ def coastline_mask(water: Image.Image) -> Image.Image:
     w, h = water.size
     edge = edge.crop((pad, pad, pad + w, pad + h)).resize(OUTPUT_SIZE, Image.LANCZOS)
     return edge.point(lambda v: int(min(255, v * 1.4) * COAST_INK_OPACITY))
+
+
+def waterline_mask(water: Image.Image) -> Image.Image:
+    """Lines at fixed distances from the coast, traced as contours of a blurred land mask."""
+    ss = WATERLINE_SUPERSAMPLE
+    size = (OUTPUT_SIZE[0] * ss, OUTPUT_SIZE[1] * ss)
+    pad = max(d for d, _ in WATERLINES) * ss * 3  # Enough for the widest blur to wrap.
+    land = wrap_pad(ImageOps.invert(water).resize(size, Image.BOX), pad)
+
+    lines = Image.new('L', land.size, 0)
+    for distance, opacity in WATERLINES:
+        # Blurring a coastline with sigma d and thresholding at ~16% (one standard
+        # deviation) yields a smooth contour roughly d pixels out to sea.
+        region = land.filter(ImageFilter.GaussianBlur(distance * ss)).point(
+            lambda v: 255 if v > 40 else 0
+        )
+        edge = ImageChops.subtract(region, region.filter(ImageFilter.MinFilter(5)))
+        lines = ImageChops.lighter(lines, edge.point(lambda v, o=opacity: int(v * o)))
+
+    lines = lines.crop((pad, pad, pad + size[0], pad + size[1]))
+    return lines.resize(OUTPUT_SIZE, Image.LANCZOS)
+
+
+def paper_grain() -> Image.Image:
+    """Multiplier (255 = unchanged) mixing fine speckle with slightly softer fibres."""
+    rng = random.Random(GRAIN_SEED)
+    w, h = OUTPUT_SIZE
+    fine = Image.frombytes('L', OUTPUT_SIZE, rng.randbytes(w * h))
+    fibres = Image.frombytes('L', OUTPUT_SIZE, rng.randbytes(w * h)).filter(
+        ImageFilter.GaussianBlur(1.2)
+    )
+    grain = ImageOps.autocontrast(Image.blend(fine, fibres, 0.6), cutoff=1)
+    return grain.point(lambda v: 255 - v * GRAIN_STRENGTH // 255).convert('RGB')
 
 
 def value_noise_3d(seed: int):
@@ -154,6 +196,7 @@ def main(source_path: str, output_path: str) -> None:
     )
     land_mask = ImageOps.invert(water).resize(OUTPUT_SIZE, Image.LANCZOS)
     coast_ink = coastline_mask(water)
+    waterlines = waterline_mask(water)
 
     luminance = source.convert('L').resize(OUTPUT_SIZE, Image.LANCZOS)
     del source, red, blue, water
@@ -165,14 +208,17 @@ def main(source_path: str, output_path: str) -> None:
     wash = near_coast.point(lambda v: int(v * COAST_WASH_STRENGTH))
     ocean = Image.composite(Image.new('RGB', OUTPUT_SIZE, OCEAN['black']), ocean, wash)
 
+    ink = Image.new('RGB', OUTPUT_SIZE, COAST_INK)
     result = Image.composite(land, ocean, land_mask)
-    result = Image.composite(Image.new('RGB', OUTPUT_SIZE, COAST_INK), result, coast_ink)
+    result = Image.composite(ink, result, waterlines)
+    result = Image.composite(ink, result, coast_ink)
 
     # Age the whole sheet last, so ink and terrain share the same paper tone.
     dark, light = aging_masks()
     toned = ImageChops.multiply(result, Image.new('RGB', OUTPUT_SIZE, AGING_DARK))
     result = Image.composite(toned, result, dark)
     result = Image.composite(Image.new('RGB', OUTPUT_SIZE, AGING_LIGHT), result, light)
+    result = ImageChops.multiply(result, paper_grain())
 
     result.save(output_path, 'JPEG', quality=84, optimize=True, progressive=True)
     print(f'Wrote {output_path} ({result.width}x{result.height})')

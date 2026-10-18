@@ -7,6 +7,8 @@ export type GlobeThemeId = 'realistic' | 'antique'
 export interface GlobeTheme {
   label: string
   textureUrl: string
+  /** CSS background for the page behind the globe. */
+  pageBackground: string
   atmosphere: { color: string; altitude: number }
   /** Applied to globe.gl's default ambient and directional lights. */
   lights: {
@@ -40,6 +42,8 @@ export const GLOBE_THEMES: Record<GlobeThemeId, GlobeTheme> = {
   realistic: {
     label: 'Realistic',
     textureUrl: '/textures/earth-blue-marble.jpg',
+    pageBackground:
+      'radial-gradient(ellipse at center, var(--color-ink-soft) 0%, var(--color-ink) 70%)',
     atmosphere: { color: '#e9d8b4', altitude: 0.16 },
     // globe.gl defaults
     lights: {
@@ -63,7 +67,13 @@ export const GLOBE_THEMES: Record<GlobeThemeId, GlobeTheme> = {
   antique: {
     label: 'Antique',
     textureUrl: '/textures/earth-antique.jpg',
-    atmosphere: { color: '#d8b679', altitude: 0.12 },
+    // Warm charcoal with a soft overhead light, like an object in a display case.
+    pageBackground: [
+      'radial-gradient(ellipse 70% 55% at 50% 0%, rgba(255, 226, 180, 0.07), transparent 70%)',
+      'radial-gradient(ellipse at center, #221c16 0%, #100d0b 70%)',
+    ].join(', '),
+    // A narrow warm halo rather than a glowing atmosphere; physical globes don't glow.
+    atmosphere: { color: '#b8925a', altitude: 0.06 },
     // Warm, slightly softer light, like a globe under lamplight.
     lights: {
       ambientColor: '#e6d6b8',
