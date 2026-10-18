@@ -7,6 +7,10 @@
   --color-ivory: #f3ece0;
   --color-ivory-muted: #b9b2a5;
   --color-gold: #c9a96e;
+  /* Artwork markers: polished brass with sepia-ink outlines */
+  --color-brass: #c9a24f;
+  --color-brass-light: #ecd08c;
+  --color-sepia-ink: #2f2113;
 
   /* Local font stacks only — no web font downloads */
   --font-display:
@@ -34,6 +38,11 @@
   padding: 0;
   border-radius: 0;
   background: none;
+}
+
+/* Hide the country tooltip while an artwork marker (and its preview) is hovered. */
+[data-marker-hover] .float-tooltip-kap {
+  visibility: hidden;
 }
 
 .globe-tooltip {

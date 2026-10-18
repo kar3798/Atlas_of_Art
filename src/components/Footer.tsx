@@ -1,8 +1,8 @@
+/** Thin bottom bar, kept outside the globe area so it never overlaps the globe. */
 export default function Footer() {
   return (
-    <footer className="pointer-events-none px-6 pb-6 text-center text-xs leading-relaxed text-ivory-muted/70 sm:px-10 sm:pb-8">
-      An open educational project exploring openly accessible museum
-      collections.
+    <footer className="shrink-0 border-t border-gold/10 px-6 py-2.5 text-center text-[0.7rem] leading-relaxed text-ivory-muted/70">
+      An open educational project exploring openly accessible museum collections.
     </footer>
   )
 }

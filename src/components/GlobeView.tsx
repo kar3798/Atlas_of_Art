@@ -9,6 +9,7 @@ import {
 } from 'three'
 import { COUNTRY_FEATURES, getCountryFeature } from '../data/countryBoundaries'
 import { isSelectableCountry } from '../data/selectableCountries'
+import { sphericalCircle } from '../lib/geo'
 import { createGraticule, type GraticuleLine } from '../lib/graticule'
 import { useElementSize } from '../lib/useElementSize'
 import type { GlobeTheme } from '../styles/globeThemes'
@@ -17,6 +18,8 @@ import type {
   CountrySelection,
   SelectableCountryId,
 } from '../types/country'
+import type { LocationGroup } from '../types/discovery'
+import { useArtworkMarkerLayer } from './useArtworkMarkerLayer'
 
 // Globe radius is 100 scene units; these bound the camera distance from the center.
 const MIN_DISTANCE = 140
@@ -35,11 +38,36 @@ const TRANSPARENT = 'rgba(0, 0, 0, 0)'
 
 // Just above unhighlighted country polygons (altitude 0.005) so lines aren't hidden by them.
 const GRATICULE_ALTITUDE = 0.006
+// Region outlines sit above the raised selected country (0.02) so they stay crisp.
+const REGION_OUTLINE_ALTITUDE = 0.022
+
+// Closer for documented sites than for broad regions.
+const LOCATION_FOCUS_ALTITUDE = { site: 1.35, region: 1.6 }
+const LOCATION_FOCUS_TRANSITION_MS = 1000
+
+/** Dashed outline of a broad region; its points carry their own altitude. */
+interface RegionOutline {
+  regionId: string
+  points: [number, number, number][]
+}
+
+type GlobePath = GraticuleLine | RegionOutline
+const isRegionOutline = (obj: object): obj is RegionOutline => 'regionId' in obj
+
+// Layer accessors live at module level: globe.gl rebuilds a layer whenever an
+// accessor prop changes identity, so inline functions would rebuild it on every render.
+const pathPointAlt = (point: object) => (point as number[])[2] ?? GRATICULE_ALTITUDE
+const pathDashLength = (obj: object) => (isRegionOutline(obj) ? 0.018 : 1)
+const pathDashGap = (obj: object) => (isRegionOutline(obj) ? 0.012 : 0)
 
 interface GlobeViewProps {
   theme: GlobeTheme
   selection: CountrySelection | null
   onSelect: (id: SelectableCountryId) => void
+  /** Artwork locations to mark on the globe (empty when no country is selected). */
+  markerGroups: LocationGroup[]
+  selectedLocationId: string | null
+  onSelectLocation: (locationId: string) => void
 }
 
 /** Recolors globe.gl's default ambient and directional lights to match the theme. */
@@ -87,7 +115,14 @@ function countryTooltip(obj: object) {
   return `<div class="globe-tooltip">${name}${hint}</div>`
 }
 
-export default function GlobeView({ theme, selection, onSelect }: GlobeViewProps) {
+export default function GlobeView({
+  theme,
+  selection,
+  onSelect,
+  markerGroups,
+  selectedLocationId,
+  onSelectLocation,
+}: GlobeViewProps) {
   const [containerRef, { width, height }] = useElementSize<HTMLDivElement>()
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const resumeTimer = useRef<number | undefined>(undefined)
@@ -127,6 +162,28 @@ export default function GlobeView({ theme, selection, onSelect }: GlobeViewProps
     if (globeRef.current) applyLights(globeRef.current, theme)
   }, [theme])
 
+  const getCanvas = useCallback(() => globeRef.current?.renderer().domElement, [])
+  const markers = useArtworkMarkerLayer({
+    groups: markerGroups,
+    appearance: theme.markers,
+    selectedLocationId,
+    onSelectLocation,
+    getCanvas,
+  })
+  const { clearHover } = markers
+
+  // Gently turn toward a newly selected location. Manual gestures cancel this (see 'start' below).
+  const selectedLocation =
+    markerGroups.find((group) => group.location.id === selectedLocationId)?.location ?? null
+  useEffect(() => {
+    if (!selectedLocation) return
+    const { lat, lng, precision } = selectedLocation
+    globeRef.current?.pointOfView(
+      { lat, lng, altitude: LOCATION_FOCUS_ALTITUDE[precision] },
+      LOCATION_FOCUS_TRANSITION_MS,
+    )
+  }, [selectedLocation])
+
   const handleGlobeReady = () => {
     const globe = globeRef.current
     if (!globe) return
@@ -145,6 +202,7 @@ export default function GlobeView({ theme, selection, onSelect }: GlobeViewProps
       window.clearTimeout(resumeTimer.current)
       isInteracting.current = true
       controls.autoRotate = false
+      clearHover()
       // Stop any in-progress focus animation so it doesn't fight the gesture.
       globe.pointOfView(globe.pointOfView())
     })
@@ -167,14 +225,37 @@ export default function GlobeView({ theme, selection, onSelect }: GlobeViewProps
     () => (graticuleStyle ? createGraticule(graticuleStyle.step) : []),
     [graticuleStyle],
   )
-  const graticuleColor = useCallback(
+  const regionOutlines = useMemo<RegionOutline[]>(
+    () =>
+      markerGroups
+        .map((group) => group.location)
+        .filter((location) => location.precision === 'region' && location.regionRadiusDeg)
+        .map((location) => ({
+          regionId: location.id,
+          points: sphericalCircle(location.lat, location.lng, location.regionRadiusDeg!).map(
+            ([lat, lng]): [number, number, number] => [lat, lng, REGION_OUTLINE_ALTITUDE],
+          ),
+        })),
+    [markerGroups],
+  )
+  const paths = useMemo<GlobePath[]>(
+    () => [...graticule, ...regionOutlines],
+    [graticule, regionOutlines],
+  )
+
+  const pathColor = useCallback(
     (obj: object) => {
+      if (isRegionOutline(obj)) {
+        return obj.regionId === selectedLocationId
+          ? theme.markers.regionOutlineSelected
+          : theme.markers.regionOutline
+      }
       if (!graticuleStyle) return TRANSPARENT
       return (obj as GraticuleLine).isEquator
         ? graticuleStyle.equatorColor
         : graticuleStyle.color
     },
-    [graticuleStyle],
+    [graticuleStyle, selectedLocationId, theme.markers],
   )
 
   const capColor = useCallback(
@@ -223,6 +304,8 @@ export default function GlobeView({ theme, selection, onSelect }: GlobeViewProps
       className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
       aria-label="Interactive 3D globe. Drag to rotate, scroll or pinch to zoom."
       role="img"
+      data-globe-area
+      data-marker-hover={markers.isHovering ? '' : undefined}
     >
       {width > 0 && height > 0 && (
         <Globe
@@ -249,14 +332,18 @@ export default function GlobeView({ theme, selection, onSelect }: GlobeViewProps
           showPointerCursor={(type, obj) =>
             type === 'polygon' && isSelectableCountry(asCountry(obj).properties.id)
           }
-          pathsData={graticule}
+          pathsData={paths}
           pathPoints="points"
-          pathColor={graticuleColor}
-          pathPointAlt={GRATICULE_ALTITUDE}
+          pathColor={pathColor}
+          pathPointAlt={pathPointAlt}
+          pathDashLength={pathDashLength}
+          pathDashGap={pathDashGap}
           pathTransitionDuration={0}
           pointerEventsFilter={isInteractive}
+          {...markers.globeProps}
         />
       )}
+      {markers.portals}
     </div>
   )
 }

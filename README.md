@@ -89,6 +89,26 @@ Origins are never inferred from an artist's nationality or a work's subject.
 Records whose origin is not documented, or whose recorded region spans
 present-day borders (e.g. Kashmir, Bengal), are left out rather than guessed.
 
+### Geographic discovery prototype
+
+Selecting a country also shows artwork location markers on the globe. These
+are a **UI prototype**: the places are real (approximate published
+coordinates), but the artworks are synthetic placeholders marked "Demo only",
+with CSS placeholder images and no museum links. They live in
+`src/data/demoDiscovery.ts`, use the types in `src/types/discovery.ts`, and are
+meant to be replaced by verified museum records.
+
+Locations have a precision:
+
+- **Specific location** (`site`): a documented site or city, shown as a brass
+  pin. Artworks relate to it as "Created in" or "Found at".
+- **Regional association** (`region`): a broad area, shown as a dashed ring
+  and a dashed outline on the globe. Its coordinates are only an approximate
+  centre, never an exact location.
+
+`src/lib/discovery.ts` groups artworks by shared location ID (one marker with
+a count) and rejects mismatches, such as a "Found at" relationship on a region.
+
 ## Attribution
 
 - **Earth texture** (`public/textures/earth-blue-marble.jpg`): NASA Blue Marble

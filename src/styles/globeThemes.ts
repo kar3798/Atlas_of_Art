@@ -30,6 +30,57 @@ export interface GlobeTheme {
   graticule: { step: number; color: string; equatorColor: string } | null
   /** Surface finish (Phong specular highlight); `null` keeps globe.gl's default material. */
   varnish: { specularColor: string; shininess: number } | null
+  /** Artwork location markers. Pin values are CSS backgrounds/colours. */
+  markers: MarkerStyle
+}
+
+export interface MarkerStyle {
+  pinBall: string
+  pinBallSelected: string
+  pinBallBorder: string
+  pinNeedle: string
+  /** Rim around the selected pin's ball. */
+  selectedRing: string
+  /** Glow on hover and selection. */
+  glow: string
+  regionRing: string
+  regionBacking: string
+  regionDot: string
+  /** Dashed outline drawn on the globe around a region. */
+  regionOutline: string
+  regionOutlineSelected: string
+}
+
+/** Classic map push pin: glossy red head on a steel needle. */
+const REALISTIC_MARKERS: MarkerStyle = {
+  pinBall: 'radial-gradient(circle at 35% 30%, #ffd6d0 0%, #e8483e 30%, #b01c16 66%, #560806 100%)',
+  pinBallSelected:
+    'radial-gradient(circle at 35% 30%, #ffffff 0%, #ff7468 30%, #d42a22 66%, #6e0b08 100%)',
+  pinBallBorder: 'rgba(40, 4, 2, 0.7)',
+  pinNeedle: 'linear-gradient(to right, #8b929a, #eef1f4 45%, #6b7178)',
+  selectedRing: 'rgba(255, 255, 255, 0.7)',
+  glow: 'rgba(255, 255, 255, 0.75)',
+  regionRing: '#f5f1e8',
+  regionBacking: 'rgba(8, 12, 22, 0.5)',
+  regionDot: '#d8342b',
+  regionOutline: 'rgba(245, 241, 232, 0.7)',
+  regionOutlineSelected: 'rgba(255, 255, 255, 1)',
+}
+
+/** Polished brass pin head on a dark steel needle, with sepia-ink outlines. */
+const ANTIQUE_MARKERS: MarkerStyle = {
+  pinBall: 'radial-gradient(circle at 35% 30%, #fff3d1 0%, #e8c97f 28%, #c39a48 62%, #6e5020 100%)',
+  pinBallSelected:
+    'radial-gradient(circle at 35% 30%, #fffaf0 0%, #f6e3ae 30%, #e2bd6a 65%, #9a7230 100%)',
+  pinBallBorder: 'rgba(47, 33, 19, 0.8)',
+  pinNeedle: 'linear-gradient(to bottom, #4a3a26, #1e160d)',
+  selectedRing: 'rgba(236, 208, 140, 0.55)',
+  glow: 'rgba(236, 208, 140, 0.8)',
+  regionRing: '#ecd08c',
+  regionBacking: 'rgba(47, 33, 19, 0.45)',
+  regionDot: '#ecd08c',
+  regionOutline: 'rgba(201, 162, 79, 0.75)',
+  regionOutlineSelected: 'rgba(236, 208, 140, 1)',
 }
 
 // Theme colors as RGB triplets so opacity can vary per state.
@@ -63,6 +114,7 @@ export const GLOBE_THEMES: Record<GlobeThemeId, GlobeTheme> = {
     },
     graticule: null,
     varnish: null,
+    markers: REALISTIC_MARKERS,
   },
   antique: {
     label: 'Antique',
@@ -97,6 +149,7 @@ export const GLOBE_THEMES: Record<GlobeThemeId, GlobeTheme> = {
     },
     // A dim, warm, broad highlight: aged shellac rather than glossy plastic.
     varnish: { specularColor: '#3d2f1c', shininess: 12 },
+    markers: ANTIQUE_MARKERS,
   },
 }
 
