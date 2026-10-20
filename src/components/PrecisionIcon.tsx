@@ -1,8 +1,8 @@
 import type { LocationPrecision } from '../types/discovery'
 
-/** Small inline version of the globe markers: a pin for sites, a dashed ring for regions. */
+/** Small inline version of the globe markers: a pin for sites and cities, a dashed ring for regions. */
 export default function PrecisionIcon({ precision }: { precision: LocationPrecision }) {
-  return precision === 'site' ? (
+  return precision !== 'region' ? (
     <svg viewBox="0 0 12 22" className="h-4 w-3 shrink-0" aria-hidden="true">
       <line x1="6" y1="9" x2="6" y2="21.5" className="stroke-ivory-muted" strokeWidth="1.5" strokeLinecap="round" />
       <circle cx="6" cy="5.5" r="4.6" className="fill-brass-light stroke-sepia-ink" strokeWidth="1.1" />

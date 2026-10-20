@@ -1,8 +1,7 @@
 import type { CSSProperties } from 'react'
 import { PRECISION_LABEL, relationshipLabel } from '../lib/discovery'
 import type { LocationGroup } from '../types/discovery'
-import ArtworkPlaceholder from './ArtworkPlaceholder'
-import DemoBadge from './DemoBadge'
+import ArtworkThumb from './ArtworkThumb'
 import PrecisionIcon from './PrecisionIcon'
 
 /** Which side of the marker the preview opens on, chosen to keep it inside the viewport. */
@@ -12,7 +11,8 @@ export interface PreviewPlacement {
 }
 
 interface ArtworkPreviewProps {
-  group: LocationGroup
+  /** The location under the pointer, or several when their markers overlap. */
+  groups: LocationGroup[]
   placement: PreviewPlacement
   /** Vertical offset of the marker's visual centre from its anchor point, in px. */
   centerY: number
@@ -31,23 +31,42 @@ function placementStyle({ side, align }: PreviewPlacement, centerY: number): CSS
  * Desktop hover preview. Rendered inside the marker so it moves with the globe;
  * it ignores the pointer so it never blocks dragging or zooming.
  */
-export default function ArtworkPreview({ group, placement, centerY }: ArtworkPreviewProps) {
-  const { location, artworks } = group
-  const single = artworks.length === 1 ? artworks[0] : null
+export default function ArtworkPreview({ groups, placement, centerY }: ArtworkPreviewProps) {
+  const className =
+    'pointer-events-none absolute w-64 rounded-md border border-gold/30 bg-ink/90 p-3 text-left shadow-xl backdrop-blur-sm transition-opacity duration-150 starting:opacity-0'
+
+  if (groups.length > 1) {
+    return (
+      <div className={className} style={placementStyle(placement, centerY)}>
+        <p className="font-display text-sm text-ivory">{groups.length} places here</p>
+        <p className="mt-0.5 text-[0.7rem] text-ivory-muted">Separate locations, close together at this zoom.</p>
+        <ul className="mt-2.5 space-y-1.5 border-t border-ivory/10 pt-2 text-[0.7rem] leading-snug">
+          {groups.map(({ location, entries }) => (
+            <li key={location.id} className="flex items-center gap-1.5 text-ivory">
+              <PrecisionIcon precision={location.precision} />
+              <span className="min-w-0 flex-1 truncate">{location.name}</span>
+              <span className="text-ivory-muted">{entries.length}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-right text-[0.65rem] text-ivory-muted/70">Click to choose</p>
+      </div>
+    )
+  }
+
+  const { location, entries } = groups[0]
+  const single = entries.length === 1 ? entries[0] : null
 
   return (
-    <div
-      className="pointer-events-none absolute w-60 rounded-md border border-gold/30 bg-ink/90 p-3 text-left shadow-xl backdrop-blur-sm transition-opacity duration-150 starting:opacity-0"
-      style={placementStyle(placement, centerY)}
-    >
+    <div className={className} style={placementStyle(placement, centerY)}>
       <div className="flex gap-3">
-        <ArtworkPlaceholder size="sm" />
+        <ArtworkThumb artwork={(single ?? entries[0]).artwork} />
         <div className="min-w-0">
-          <p className="font-display text-sm leading-snug text-ivory">
-            {single ? single.title : location.name}
+          <p className="line-clamp-2 font-display text-sm leading-snug text-ivory">
+            {single ? single.artwork.title : location.name}
           </p>
           <p className="mt-0.5 text-xs text-ivory-muted">
-            {single ? (single.date ?? 'Date not recorded') : `${artworks.length} artworks`}
+            {single ? single.artwork.date.display : `${entries.length} artworks`}
           </p>
         </div>
       </div>
@@ -55,7 +74,7 @@ export default function ArtworkPreview({ group, placement, centerY }: ArtworkPre
       <div className="mt-2.5 space-y-1 border-t border-ivory/10 pt-2 text-[0.7rem] leading-snug">
         <p className="flex items-center gap-1.5 text-ivory">
           <PrecisionIcon precision={location.precision} />
-          {single ? relationshipLabel(single.placement.relationship, location.name) : location.name}
+          {single ? relationshipLabel(single.placement, location) : location.name}
         </p>
         <p className="text-ivory-muted">
           {PRECISION_LABEL[location.precision]}
@@ -63,10 +82,7 @@ export default function ArtworkPreview({ group, placement, centerY }: ArtworkPre
         </p>
       </div>
 
-      <div className="mt-2.5 flex items-center justify-between gap-2">
-        {artworks.some((artwork) => artwork.isDemo) && <DemoBadge />}
-        <span className="text-[0.65rem] text-ivory-muted/70">Click to open</span>
-      </div>
+      <p className="mt-2 text-right text-[0.65rem] text-ivory-muted/70">Click to open</p>
     </div>
   )
 }

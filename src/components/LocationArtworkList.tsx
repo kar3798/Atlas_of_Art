@@ -1,8 +1,7 @@
 import { PRECISION_LABEL, PRECISION_NOTE, relationshipLabel } from '../lib/discovery'
 import { artworkOptionId } from '../lib/elementIds'
 import type { LocationGroup } from '../types/discovery'
-import ArtworkPlaceholder from './ArtworkPlaceholder'
-import DemoBadge from './DemoBadge'
+import ArtworkThumb from './ArtworkThumb'
 import PanelNav from './PanelNav'
 import PrecisionIcon from './PrecisionIcon'
 
@@ -20,11 +19,11 @@ export default function LocationArtworkList({
   onSelectArtwork,
   onBack,
 }: LocationArtworkListProps) {
-  const { location, artworks } = group
+  const { location, entries } = group
 
   return (
     <section aria-labelledby={headingId}>
-      <PanelNav backLabel="All locations" onBack={onBack} />
+      <PanelNav backLabel="Overview" onBack={onBack} />
 
       <div className="mt-4 flex items-center gap-2">
         <PrecisionIcon precision={location.precision} />
@@ -37,7 +36,7 @@ export default function LocationArtworkList({
       </p>
 
       <ul className="mt-4 space-y-2">
-        {artworks.map((artwork) => (
+        {entries.map(({ artwork, placement }) => (
           <li key={artwork.id}>
             <button
               id={artworkOptionId(artwork.id)}
@@ -45,14 +44,13 @@ export default function LocationArtworkList({
               onClick={() => onSelectArtwork(artwork.id)}
               className="flex min-h-11 w-full items-center gap-3 rounded-md border border-ivory/10 bg-ink/40 p-2 text-left transition-colors hover:border-gold/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >
-              <ArtworkPlaceholder size="sm" />
+              <ArtworkThumb artwork={artwork} />
               <span className="min-w-0 flex-1">
                 <span className="block text-sm leading-snug text-ivory">{artwork.title}</span>
                 <span className="mt-0.5 block text-[0.7rem] text-ivory-muted">
-                  {relationshipLabel(artwork.placement.relationship, location.name)}
+                  {artwork.date.display} · {relationshipLabel(placement, location)}
                 </span>
               </span>
-              {artwork.isDemo && <DemoBadge />}
             </button>
           </li>
         ))}

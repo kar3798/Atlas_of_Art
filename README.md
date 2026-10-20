@@ -5,7 +5,8 @@ through an interactive 3D globe. The initial focus is Indian and Chinese
 sculpture and historical art, drawn from openly licensed museum collections.
 
 > Status: interactive globe with country selection for India and China, and a
-> small curated gallery of artworks from the Cleveland Museum of Art for each.
+> small curated set of Cleveland Museum of Art artworks for each, placed on the
+> globe wherever the museum records support a location.
 
 ## Getting started
 
@@ -18,6 +19,7 @@ npm run build    # type-check and build for production into dist/
 npm run preview  # serve the production build locally
 npm run lint     # run ESLint
 npm run data:artworks  # refresh the curated artwork dataset from the CMA API
+npm run validate:data  # check artwork and placement data (also runs before build)
 ```
 
 ## Tech stack
@@ -44,9 +46,9 @@ scripts/        Asset build scripts (not part of the app bundle)
 
 Globe appearance (texture, atmosphere, lighting and country colors) is defined
 in `src/styles/globeThemes.ts`; interaction logic is shared. Two styles exist:
-**Realistic** (default) and an experimental **Antique** parchment style. In
-development (`npm run dev`) a small switch in the top-right corner toggles
-between them; it is not included in production builds.
+**Antique** parchment (default) and **Realistic**. In development
+(`npm run dev`) a small switch in the top bar toggles between them; it is not
+included in production builds.
 
 The antique texture is generated from Natural Earth II imagery:
 
@@ -89,25 +91,36 @@ Origins are never inferred from an artist's nationality or a work's subject.
 Records whose origin is not documented, or whose recorded region spans
 present-day borders (e.g. Kashmir, Bengal), are left out rather than guessed.
 
-### Geographic discovery prototype
+### Artwork locations on the globe
 
-Selecting a country also shows artwork location markers on the globe. These
-are a **UI prototype**: the places are real (approximate published
-coordinates), but the artworks are synthetic placeholders marked "Demo only",
-with CSS placeholder images and no museum links. They live in
-`src/data/demoDiscovery.ts`, use the types in `src/types/discovery.ts`, and are
-meant to be replaced by verified museum records.
+Where each artwork appears on the globe is researched by hand and stored in
+`src/data/artworkPlacements.json`, separately from the museum data, so
+`npm run data:artworks` never overwrites it. Each placement cites the museum
+field it relies on (quoted verbatim) and explains any uncertainty; each
+location cites where its coordinates come from.
 
 Locations have a precision:
 
-- **Specific location** (`site`): a documented site or city, shown as a brass
-  pin. Artworks relate to it as "Created in" or "Found at".
-- **Regional association** (`region`): a broad area, shown as a dashed ring
-  and a dashed outline on the globe. Its coordinates are only an approximate
-  centre, never an exact location.
+- **Specific site** (`site`), e.g. a cave temple complex — shown as a pin.
+- **City or town** (`city`) — shown as a pin; the exact spot within it is not known.
+- **Regional association** (`region`) — shown as a dashed ring and outline. Its
+  coordinates are only a visual anchor, never an exact location.
 
-`src/lib/discovery.ts` groups artworks by shared location ID (one marker with
-a count) and rejects mismatches, such as a "Found at" relationship on a region.
+And the artwork relates to it as **created in**, **found at** (both need a
+site or city) or **associated with** (a documented attribution with no stated
+place of creation or discovery; the only option for regions). Certainty
+mirrors the source's own wording ("probably", "reportedly").
+
+Rules followed: the museum's `culture` field is treated as an attribution, not
+proof of an exact location; nothing is inferred from artist nationality,
+subject or the museum's own location; places that cannot be located from a
+reliable source are not guessed. Artworks without a supportable placement stay
+in the gallery as "Exact origin unknown".
+
+`npm run validate:data` checks, among other things, that every placement refers
+to an existing artwork, quotes text that really appears in its museum record,
+matches its certainty to that text, and uses a relationship allowed for its
+location's precision.
 
 ## Attribution
 

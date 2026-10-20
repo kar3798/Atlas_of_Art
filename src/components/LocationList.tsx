@@ -1,32 +1,29 @@
 import { PRECISION_LABEL } from '../lib/discovery'
 import { locationOptionId } from '../lib/elementIds'
 import type { LocationGroup } from '../types/discovery'
-import DemoBadge from './DemoBadge'
 import PrecisionIcon from './PrecisionIcon'
 
-interface DemoLocationListProps {
+interface LocationListProps {
   groups: LocationGroup[]
   onSelectLocation: (locationId: string) => void
 }
 
 /** Accessible list of the locations marked on the globe; a keyboard-friendly alternative to the markers. */
-export default function DemoLocationList({ groups, onSelectLocation }: DemoLocationListProps) {
+export default function LocationList({ groups, onSelectLocation }: LocationListProps) {
   if (groups.length === 0) return null
 
   return (
     <section aria-labelledby="map-locations-title">
-      <div className="flex items-center justify-between gap-3">
-        <h3 id="map-locations-title" className="text-[0.7rem] tracking-[0.2em] text-ivory-muted uppercase">
-          On the globe
-        </h3>
-        <DemoBadge />
-      </div>
+      <h3 id="map-locations-title" className="text-[0.7rem] tracking-[0.2em] text-ivory-muted uppercase">
+        On the globe
+      </h3>
       <p className="mt-1.5 text-[0.7rem] leading-relaxed text-ivory-muted/70">
-        Prototype markers. The places are real; the artworks are placeholders.
+        Placed from the museum records. Pins mark documented places; dashed rings mark broad
+        regions, not exact locations.
       </p>
 
       <ul className="mt-3 divide-y divide-ivory/10 rounded-md border border-ivory/10">
-        {groups.map(({ location, artworks }) => (
+        {groups.map(({ location, entries }) => (
           <li key={location.id}>
             <button
               id={locationOptionId(location.id)}
@@ -42,7 +39,7 @@ export default function DemoLocationList({ groups, onSelectLocation }: DemoLocat
                 </span>
               </span>
               <span className="text-xs text-ivory-muted">
-                {artworks.length} {artworks.length === 1 ? 'artwork' : 'artworks'}
+                {entries.length} {entries.length === 1 ? 'artwork' : 'artworks'}
               </span>
             </button>
           </li>

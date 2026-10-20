@@ -1,0 +1,194 @@
+{
+  "locations": [
+    {
+      "id": "ind-tamil-nadu",
+      "name": "Tamil Nadu",
+      "country": "IND",
+      "lat": 11,
+      "lng": 79,
+      "precision": "region",
+      "regionRadiusDeg": 2.5,
+      "coordinateSource": "https://en.wikipedia.org/wiki/Tamil_Nadu",
+      "coordinateNote": "Wikipedia's reference point for the state, used only as a visual anchor; the outline is a rough circle, not the state boundary."
+    },
+    {
+      "id": "ind-mathura",
+      "name": "Mathura",
+      "country": "IND",
+      "lat": 27.4925,
+      "lng": 77.6736,
+      "precision": "city",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Mathura",
+      "coordinateNote": "City coordinates from Wikipedia; they mark the city, not a specific site within it."
+    },
+    {
+      "id": "ind-bihar",
+      "name": "Bihar",
+      "country": "IND",
+      "lat": 25.4,
+      "lng": 85.1,
+      "precision": "region",
+      "regionRadiusDeg": 1.8,
+      "coordinateSource": "https://en.wikipedia.org/wiki/Bihar",
+      "coordinateNote": "Wikipedia's reference point for the state, used only as a visual anchor; the outline is a rough circle, not the state boundary."
+    },
+    {
+      "id": "ind-madhya-pradesh",
+      "name": "Madhya Pradesh",
+      "country": "IND",
+      "lat": 22.9734,
+      "lng": 78.6569,
+      "precision": "region",
+      "regionRadiusDeg": 3.5,
+      "coordinateSource": "https://www.wikidata.org/wiki/Q1188",
+      "coordinateNote": "Wikidata's coordinate location for the state, used only as a visual anchor; the outline is a rough circle, not the state boundary."
+    },
+    {
+      "id": "chn-ye",
+      "name": "Ye (ancient city)",
+      "country": "CHN",
+      "lat": 36.2748,
+      "lng": 114.4002,
+      "precision": "city",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Ye_(Hebei)",
+      "coordinateNote": "Location of the ancient city of Ye (Yecheng), now in Linzhang County, Hebei, per Wikipedia; it marks the city, not a workshop."
+    },
+    {
+      "id": "chn-xiangtangshan",
+      "name": "Xiangtangshan cave temples",
+      "country": "CHN",
+      "lat": 36.53295,
+      "lng": 114.15928,
+      "precision": "site",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Xiangtangshan_Caves",
+      "coordinateNote": "Wikipedia's point for the Xiangtangshan cave complex. The Southern group named in the museum record lies about 15 km from the Northern group; no separate coordinates were found for it."
+    },
+    {
+      "id": "chn-henan",
+      "name": "Henan",
+      "country": "CHN",
+      "lat": 33.9,
+      "lng": 113.5,
+      "precision": "region",
+      "regionRadiusDeg": 2.3,
+      "coordinateSource": "https://www.wikidata.org/wiki/Q43684",
+      "coordinateNote": "Wikidata's coordinate location for the province, used only as a visual anchor; the outline is a rough circle, not the province boundary."
+    },
+    {
+      "id": "chn-changsha",
+      "name": "Changsha",
+      "country": "CHN",
+      "lat": 28.228,
+      "lng": 112.939,
+      "precision": "city",
+      "coordinateSource": "https://en.wikipedia.org/wiki/Changsha",
+      "coordinateNote": "City coordinates from Wikipedia; they mark the city, not a find spot within it."
+    }
+  ],
+  "placements": [
+    {
+      "artworkId": "cma-111811",
+      "accessionNumber": "1930.331",
+      "locationId": "ind-tamil-nadu",
+      "relationship": "associated-with",
+      "certainty": "stated",
+      "evidence": {
+        "field": "culture",
+        "text": "South India, Tamil Nadu, Chola period (900–1200s)",
+        "sourceUrl": "https://clevelandart.org/art/1930.331"
+      },
+      "note": "The record names present-day Tamil Nadu and the Chola period but no place of production, so the work is shown as a regional association."
+    },
+    {
+      "artworkId": "cma-145408",
+      "accessionNumber": "1970.63",
+      "locationId": "ind-mathura",
+      "relationship": "associated-with",
+      "certainty": "stated",
+      "evidence": {
+        "field": "culture",
+        "text": "Northern India, Uttar Pradesh, Mathura, Kushan period",
+        "sourceUrl": "https://clevelandart.org/art/1970.63"
+      },
+      "note": "The museum attributes the work to Mathura, a major centre of Kushan-period sculpture. The record does not state where it was made or found."
+    },
+    {
+      "artworkId": "cma-114974",
+      "accessionNumber": "1935.146",
+      "locationId": "ind-bihar",
+      "relationship": "associated-with",
+      "certainty": "stated",
+      "evidence": {
+        "field": "culture",
+        "text": "Northeastern India, Bihar, Tetravan, Pala Period (750-1197)",
+        "sourceUrl": "https://clevelandart.org/art/1935.146"
+      },
+      "note": "The record also names Tetravan, a village in Bihar. Its location could not be verified from a reliable source, so the work is shown at the state level rather than pinned to a guessed village."
+    },
+    {
+      "artworkId": "cma-137128",
+      "accessionNumber": "1961.93",
+      "locationId": "ind-madhya-pradesh",
+      "relationship": "associated-with",
+      "certainty": "stated",
+      "evidence": {
+        "field": "culture",
+        "text": "Central India, Madhya Pradesh",
+        "sourceUrl": "https://clevelandart.org/art/1961.93"
+      },
+      "note": "Only the present-day state is recorded; no site, city or period is given."
+    },
+    {
+      "artworkId": "cma-93992",
+      "accessionNumber": "1914.567",
+      "locationId": "chn-ye",
+      "relationship": "created-in",
+      "certainty": "stated",
+      "evidence": {
+        "field": "description",
+        "text": "It was carved by one of the finest craftsmen in the Eastern Wei capital of Ye in Hebei province.",
+        "sourceUrl": "https://clevelandart.org/art/1914.567"
+      },
+      "note": "The museum's description places the carving in Ye, the Eastern Wei capital. The marker shows the ancient city, not a specific workshop."
+    },
+    {
+      "artworkId": "cma-146721",
+      "accessionNumber": "1972.166",
+      "locationId": "chn-xiangtangshan",
+      "relationship": "associated-with",
+      "certainty": "stated",
+      "evidence": {
+        "field": "culture",
+        "text": "China, Hebei province, Southern Xiangtangshan caves, Northern Qi dynasty (550-577)",
+        "sourceUrl": "https://clevelandart.org/art/1972.166"
+      },
+      "note": "The museum attributes the figure to the Southern Xiangtangshan cave temples (and exhibited it in “Echoes of the Past: The Buddhist Cave Temples at Xiangtangshan”). The record does not identify the cave."
+    },
+    {
+      "artworkId": "cma-132819",
+      "accessionNumber": "1955.295",
+      "locationId": "chn-henan",
+      "relationship": "associated-with",
+      "certainty": "probable",
+      "evidence": {
+        "field": "culture",
+        "text": "China, probably Henan province, Tang dynasty (618–907)",
+        "sourceUrl": "https://clevelandart.org/art/1955.295"
+      },
+      "note": "The museum gives Henan as probable, not certain, and records no site."
+    },
+    {
+      "artworkId": "cma-117940",
+      "accessionNumber": "1938.9",
+      "locationId": "chn-changsha",
+      "relationship": "found-at",
+      "certainty": "reported",
+      "evidence": {
+        "field": "culture",
+        "text": "China, reportedly from Hunan province, Changsha, Warring States period (475–221 BCE), State of Chu (c. 1046–223 BCE)",
+        "sourceUrl": "https://clevelandart.org/art/1938.9"
+      },
+      "note": "The find site is reported, not confirmed: the museum says “reportedly from … Changsha”, and a 1930s study cited in the record describes the work as “said to have been discovered in Chang-sha”."
+    }
+  ]
+}

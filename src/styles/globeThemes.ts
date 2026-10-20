@@ -153,4 +153,4 @@ export const GLOBE_THEMES: Record<GlobeThemeId, GlobeTheme> = {
   },
 }
 
-export const DEFAULT_GLOBE_THEME: GlobeThemeId = 'realistic'
+export const DEFAULT_GLOBE_THEME: GlobeThemeId = 'antique'

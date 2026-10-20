@@ -6,7 +6,7 @@ import GlobeThemeSwitch from './components/GlobeThemeSwitch'
 import Header from './components/Header'
 import { getArtworksForCountry } from './data/artworks'
 import { getSelectableCountry } from './data/selectableCountries'
-import { findGroup, findMappedArtwork, getLocationGroups } from './lib/discovery'
+import { findGroup, findPlacement, getLocationGroups } from './lib/discovery'
 import { countryOptionId } from './lib/elementIds'
 import { DEFAULT_GLOBE_THEME, GLOBE_THEMES, type GlobeThemeId } from './styles/globeThemes'
 import type { CountrySelection, SelectableCountryId } from './types/country'
@@ -50,18 +50,18 @@ function App() {
   const selectLocation = useCallback((locationId: string) => {
     const group = findGroup(locationId)
     setSelectedLocationId(locationId)
-    setSelectedArtworkId(group?.artworks.length === 1 ? group.artworks[0].id : null)
+    setSelectedArtworkId(group?.entries.length === 1 ? group.entries[0].artwork.id : null)
   }, [])
 
+  // Opening an artwork (from the gallery or a list) also selects its location, if it has
+  // one, so its marker is highlighted and the globe turns toward it.
   const selectArtwork = useCallback((artworkId: string) => {
-    const artwork = findMappedArtwork(artworkId)
-    if (!artwork) return
-    setSelectedLocationId(artwork.placement.locationId)
+    setSelectedLocationId(findPlacement(artworkId)?.locationId ?? null)
     setSelectedArtworkId(artworkId)
   }, [])
 
   const stepBack = useCallback(() => {
-    if (selectedArtworkId && (findGroup(selectedLocationId)?.artworks.length ?? 0) > 1) {
+    if (selectedArtworkId && (findGroup(selectedLocationId)?.entries.length ?? 0) > 1) {
       setSelectedArtworkId(null)
     } else {
       closeDiscovery()
@@ -69,16 +69,17 @@ function App() {
   }, [selectedArtworkId, selectedLocationId, closeDiscovery])
 
   // Escape steps back out of artwork details first, then clears the country.
+  // (An open place chooser on the globe handles Escape before this.)
   useEffect(() => {
     if (!selectedId) return
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
-      if (selectedLocationId) stepBack()
+      if (selectedLocationId || selectedArtworkId) stepBack()
       else clearSelection()
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedId, selectedLocationId, stepBack, clearSelection])
+  }, [selectedId, selectedLocationId, selectedArtworkId, stepBack, clearSelection])
 
   return (
     <div

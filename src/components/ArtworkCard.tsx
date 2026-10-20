@@ -1,18 +1,23 @@
-import { originLabel } from '../lib/origin'
+import { findGroup, findPlacement, relationshipLabel, UNPLACED_LABEL } from '../lib/discovery'
+import { galleryCardId } from '../lib/elementIds'
 import type { Artwork } from '../types/artwork'
+import PrecisionIcon from './PrecisionIcon'
 
 interface ArtworkCardProps {
   artwork: Artwork
-  onOpen: (artwork: Artwork) => void
+  onOpen: (artworkId: string) => void
 }
 
 export default function ArtworkCard({ artwork, onOpen }: ArtworkCardProps) {
+  const placement = findPlacement(artwork.id)
+  const location = placement ? (findGroup(placement.locationId)?.location ?? null) : null
+
   return (
     <li>
       <button
+        id={galleryCardId(artwork.id)}
         type="button"
-        onClick={() => onOpen(artwork)}
-        aria-haspopup="dialog"
+        onClick={() => onOpen(artwork.id)}
         className="group flex h-full w-full flex-col overflow-hidden rounded-md border border-ivory/10 bg-ink/40 text-left transition-colors hover:border-gold/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
       >
         <div className="flex aspect-[4/5] w-full items-center justify-center bg-ink-soft/70 p-3">
@@ -35,8 +40,15 @@ export default function ArtworkCard({ artwork, onOpen }: ArtworkCardProps) {
           <p className="line-clamp-2 text-xs text-ivory-muted/80">
             {artwork.creator ?? artwork.culture}
           </p>
-          <p className="mt-auto pt-2 text-[0.7rem] leading-snug text-gold">
-            {originLabel(artwork.origin)}
+          <p className="mt-auto flex items-start gap-1.5 pt-2 text-[0.7rem] leading-snug text-gold">
+            {placement && location ? (
+              <>
+                <PrecisionIcon precision={location.precision} />
+                {relationshipLabel(placement, location)}
+              </>
+            ) : (
+              <span className="text-ivory-muted">{UNPLACED_LABEL} · not on the globe</span>
+            )}
           </p>
           <p className="text-[0.65rem] tracking-wide text-ivory-muted/60">
             {artwork.source.museum}

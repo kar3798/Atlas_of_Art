@@ -22,7 +22,9 @@ import type { LocationGroup } from '../types/discovery'
 import { useArtworkMarkerLayer } from './useArtworkMarkerLayer'
 
 // Globe radius is 100 scene units; these bound the camera distance from the center.
-const MIN_DISTANCE = 140
+// The closest zoom (15 units above the surface) lets sites tens of kilometres apart,
+// such as Ye and Xiangtangshan (36 km), show as distinct pins. Earlier limit: 140.
+const MIN_DISTANCE = 115
 const MAX_DISTANCE = 600
 
 const AUTO_ROTATE_SPEED = 0.35
@@ -42,7 +44,7 @@ const GRATICULE_ALTITUDE = 0.006
 const REGION_OUTLINE_ALTITUDE = 0.022
 
 // Closer for documented sites than for broad regions.
-const LOCATION_FOCUS_ALTITUDE = { site: 1.35, region: 1.6 }
+const LOCATION_FOCUS_ALTITUDE = { site: 1.35, city: 1.35, region: 1.6 }
 const LOCATION_FOCUS_TRANSITION_MS = 1000
 
 /** Dashed outline of a broad region; its points carry their own altitude. */
@@ -107,11 +109,13 @@ const isInteractive = (obj: Object3D) =>
 
 const asCountry = (obj: object) => obj as CountryFeature
 
-function countryTooltip(obj: object) {
+/** Country tooltip; the "Select to explore" hint is dropped once that country is selected. */
+function countryTooltip(obj: object, selectedId: SelectableCountryId | null) {
   const { id, name } = asCountry(obj).properties
-  const hint = isSelectableCountry(id)
-    ? '<span class="globe-tooltip-hint">Select to explore</span>'
-    : ''
+  const hint =
+    isSelectableCountry(id) && id !== selectedId
+      ? `<span class="globe-tooltip-hint" data-country="${id}">Select to explore</span>`
+      : ''
   return `<div class="globe-tooltip">${name}${hint}</div>`
 }
 
@@ -162,15 +166,15 @@ export default function GlobeView({
     if (globeRef.current) applyLights(globeRef.current, theme)
   }, [theme])
 
-  const getCanvas = useCallback(() => globeRef.current?.renderer().domElement, [])
+  const getGlobe = useCallback(() => globeRef.current, [])
   const markers = useArtworkMarkerLayer({
     groups: markerGroups,
     appearance: theme.markers,
     selectedLocationId,
     onSelectLocation,
-    getCanvas,
+    getGlobe,
   })
-  const { clearHover } = markers
+  const interruptMarkers = markers.interrupt
 
   // Gently turn toward a newly selected location. Manual gestures cancel this (see 'start' below).
   const selectedLocation =
@@ -202,7 +206,8 @@ export default function GlobeView({
       window.clearTimeout(resumeTimer.current)
       isInteracting.current = true
       controls.autoRotate = false
-      clearHover()
+      // Hide marker previews and close the place chooser.
+      interruptMarkers()
       // Stop any in-progress focus animation so it doesn't fight the gesture.
       globe.pointOfView(globe.pointOfView())
     })
@@ -293,57 +298,74 @@ export default function GlobeView({
     [selectedId, hovered],
   )
 
+  // Tooltip content only (not a layer accessor), so a new identity doesn't rebuild polygons.
+  const polygonLabel = useCallback((obj: object) => countryTooltip(obj, selectedId), [selectedId])
+
+  // globe.gl only recomputes tooltip text when the pointer moves to a different object,
+  // so a tooltip already showing for the just-selected country keeps its old hint.
+  // Remove that stale hint directly.
+  useEffect(() => {
+    if (!selectedId) return
+    containerRef.current
+      ?.querySelectorAll(`.globe-tooltip-hint[data-country="${selectedId}"]`)
+      .forEach((hint) => hint.remove())
+  }, [selectedId, containerRef])
+
   const handleCountryClick = (obj: object) => {
     const { id } = asCountry(obj).properties
     if (isSelectableCountry(id)) onSelect(id)
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
-      aria-label="Interactive 3D globe. Drag to rotate, scroll or pinch to zoom."
-      role="img"
-      data-globe-area
-      data-marker-hover={markers.isHovering ? '' : undefined}
-    >
-      {width > 0 && height > 0 && (
-        <Globe
-          ref={globeRef}
-          width={width}
-          height={height}
-          backgroundColor="rgba(0, 0, 0, 0)"
-          globeImageUrl={theme.textureUrl}
-          // null (not undefined) is what tells globe.gl to restore its default material.
-          globeMaterial={globeMaterialFor(theme) as Material}
-          showAtmosphere
-          atmosphereColor={theme.atmosphere.color}
-          atmosphereAltitude={theme.atmosphere.altitude}
-          onGlobeReady={handleGlobeReady}
-          polygonsData={COUNTRY_FEATURES}
-          polygonCapColor={capColor}
-          polygonSideColor={sideColor}
-          polygonStrokeColor={strokeColor}
-          polygonAltitude={altitude}
-          polygonsTransitionDuration={300}
-          polygonLabel={countryTooltip}
-          onPolygonHover={(obj) => setHovered(obj ? asCountry(obj) : null)}
-          onPolygonClick={handleCountryClick}
-          showPointerCursor={(type, obj) =>
-            type === 'polygon' && isSelectableCountry(asCountry(obj).properties.id)
-          }
-          pathsData={paths}
-          pathPoints="points"
-          pathColor={pathColor}
-          pathPointAlt={pathPointAlt}
-          pathDashLength={pathDashLength}
-          pathDashGap={pathDashGap}
-          pathTransitionDuration={0}
-          pointerEventsFilter={isInteractive}
-          {...markers.globeProps}
-        />
-      )}
-      {markers.portals}
-    </div>
+    <>
+      <div
+        ref={containerRef}
+        className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
+        aria-label="Interactive 3D globe. Drag to rotate, scroll or pinch to zoom."
+        role="img"
+        data-globe-area
+        data-marker-hover={markers.isHovering ? '' : undefined}
+      >
+        {width > 0 && height > 0 && (
+          <Globe
+            ref={globeRef}
+            width={width}
+            height={height}
+            backgroundColor="rgba(0, 0, 0, 0)"
+            globeImageUrl={theme.textureUrl}
+            // null (not undefined) is what tells globe.gl to restore its default material.
+            globeMaterial={globeMaterialFor(theme) as Material}
+            showAtmosphere
+            atmosphereColor={theme.atmosphere.color}
+            atmosphereAltitude={theme.atmosphere.altitude}
+            onGlobeReady={handleGlobeReady}
+            polygonsData={COUNTRY_FEATURES}
+            polygonCapColor={capColor}
+            polygonSideColor={sideColor}
+            polygonStrokeColor={strokeColor}
+            polygonAltitude={altitude}
+            polygonsTransitionDuration={300}
+            polygonLabel={polygonLabel}
+            onPolygonHover={(obj) => setHovered(obj ? asCountry(obj) : null)}
+            onPolygonClick={handleCountryClick}
+            showPointerCursor={(type, obj) =>
+              type === 'polygon' && isSelectableCountry(asCountry(obj).properties.id)
+            }
+            pathsData={paths}
+            pathPoints="points"
+            pathColor={pathColor}
+            pathPointAlt={pathPointAlt}
+            pathDashLength={pathDashLength}
+            pathDashGap={pathDashGap}
+            pathTransitionDuration={0}
+            pointerEventsFilter={isInteractive}
+            {...markers.globeProps}
+          />
+        )}
+        {markers.portals}
+      </div>
+      {/* Outside the role="img" globe so assistive technology can reach it; covers the same area. */}
+      {markers.overlay}
+    </>
   )
 }

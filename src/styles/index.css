@@ -38,6 +38,8 @@
   padding: 0;
   border-radius: 0;
   background: none;
+  /* Follows the cursor, so it must sit above artwork markers (which share its stacking context). */
+  z-index: 1000;
 }
 
 /* Hide the country tooltip while an artwork marker (and its preview) is hovered. */

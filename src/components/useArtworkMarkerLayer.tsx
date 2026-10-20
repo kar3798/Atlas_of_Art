@@ -1,23 +1,28 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import type { GlobeMethods } from 'react-globe.gl'
+import { markersAt } from '../lib/markerHitTest'
+import { markerCenterY } from '../lib/markerGeometry'
 import type { MarkerStyle } from '../styles/globeThemes'
 import type { LocationGroup } from '../types/discovery'
-import ArtworkMarker from './ArtworkMarker'
+import ArtworkMarker, { type PointerPosition } from './ArtworkMarker'
 import type { PreviewPlacement } from './ArtworkPreview'
+import PlaceChooser from './PlaceChooser'
 
 // Above the selected (raised) country polygon, so markers are never hidden by it.
 const MARKER_ALTITUDE = 0.025
 const PREVIEW_WIDTH = 260
 const PREVIEW_EDGE_MARGIN = 140
 const HOVER_END_DELAY_MS = 80
+// Radius of a marker's hit area (the 44px button in ArtworkMarker).
+const HIT_RADIUS = 22
 
 interface MarkerLayerOptions {
   groups: LocationGroup[]
   appearance: MarkerStyle
   selectedLocationId: string | null
   onSelectLocation: (locationId: string) => void
-  /** The globe's canvas, for forwarding mouse-wheel zoom from markers. */
-  getCanvas: () => HTMLCanvasElement | undefined
+  getGlobe: () => GlobeMethods | undefined
 }
 
 /**
@@ -66,26 +71,93 @@ function choosePlacement(target: HTMLElement): PreviewPlacement {
 const markerLat = (d: object) => (d as LocationGroup).location.lat
 const markerLng = (d: object) => (d as LocationGroup).location.lng
 
-/** Marker-layer props for react-globe.gl, plus the React portals that render the markers. */
+interface Chooser {
+  /** The groups this chooser was opened for; it closes when they change (new country, filters). */
+  groups: LocationGroup[]
+  locationIds: string[]
+  x: number
+  y: number
+  areaWidth: number
+  areaHeight: number
+}
+
+/**
+ * Marker-layer props for react-globe.gl, the React portals that render the markers,
+ * and the place chooser overlay.
+ *
+ * Markers always sit at their true positions. Where several markers overlap on screen
+ * (e.g. two sites 36 km apart), hovering lists every place under the pointer and
+ * clicking opens a chooser, so each stays reachable without moving any marker.
+ */
 export function useArtworkMarkerLayer({
   groups,
   appearance,
   selectedLocationId,
   onSelectLocation,
-  getCanvas,
+  getGlobe,
 }: MarkerLayerOptions) {
-  const [hover, setHover] = useState<{ locationId: string; placement: PreviewPlacement } | null>(null)
+  const [hover, setHover] = useState<{
+    locationId: string
+    locationIds: string[]
+    placement: PreviewPlacement
+  } | null>(null)
   const hoverEndTimer = useRef<number | undefined>(undefined)
+  const [chooserState, setChooserState] = useState<Chooser | null>(null)
+  const chooser = chooserState?.groups === groups ? chooserState : null
 
-  const anchors = useMemo(
-    () => new Map(groups.map((group) => [group.location.id, createMarkerAnchor(getCanvas)])),
-    [groups, getCanvas],
+  const groupById = useMemo(() => new Map(groups.map((group) => [group.location.id, group])), [groups])
+
+  const anchors = useMemo(() => {
+    const getCanvas = () => getGlobe()?.renderer().domElement
+    return new Map(groups.map((group) => [group.location.id, createMarkerAnchor(getCanvas)]))
+  }, [groups, getGlobe])
+
+  /**
+   * Every location whose marker's hit area contains the pointer, in list order, with
+   * the pointer's position in the globe area. Always includes `locationId`.
+   */
+  const locationsUnder = useCallback(
+    (locationId: string, { clientX, clientY }: PointerPosition) => {
+      const globe = getGlobe()
+      const canvas = globe?.renderer().domElement
+      if (!globe || !canvas) return null
+      const area = canvas.getBoundingClientRect()
+      const point = { x: clientX - area.left, y: clientY - area.top }
+      const hits = new Set(
+        markersAt(
+          point,
+          groups
+            // Markers on the far side of the globe are hidden (display: none) by globe.gl.
+            .filter((group) => anchors.get(group.location.id)!.style.display !== 'none')
+            .map(({ location }) => {
+              const screen = globe.getScreenCoords(location.lat, location.lng, MARKER_ALTITUDE)
+              return { id: location.id, x: screen.x, y: screen.y + markerCenterY(location.precision) }
+            }),
+          HIT_RADIUS,
+        ),
+      )
+      hits.add(locationId)
+      return {
+        locationIds: groups.map((group) => group.location.id).filter((id) => hits.has(id)),
+        point,
+        area,
+      }
+    },
+    [groups, anchors, getGlobe],
   )
 
-  const startHover = useCallback((locationId: string, target: HTMLElement) => {
-    window.clearTimeout(hoverEndTimer.current)
-    setHover({ locationId, placement: choosePlacement(target) })
-  }, [])
+  const startHover = useCallback(
+    (locationId: string, target: HTMLElement, pointer: PointerPosition) => {
+      window.clearTimeout(hoverEndTimer.current)
+      const under = locationsUnder(locationId, pointer)
+      setHover({
+        locationId,
+        locationIds: under?.locationIds ?? [locationId],
+        placement: choosePlacement(target),
+      })
+    },
+    [locationsUnder],
+  )
 
   // A short delay avoids flicker when the pointer brushes the edge of the hit area.
   const endHover = useCallback(() => {
@@ -93,20 +165,47 @@ export function useArtworkMarkerLayer({
     hoverEndTimer.current = window.setTimeout(() => setHover(null), HOVER_END_DELAY_MS)
   }, [])
 
-  const clearHover = useCallback(() => {
+  const closeChooser = useCallback(() => setChooserState(null), [])
+
+  /** Called when the user starts rotating or zooming the globe. */
+  const interrupt = useCallback(() => {
     window.clearTimeout(hoverEndTimer.current)
     setHover(null)
+    setChooserState(null)
   }, [])
 
   const selectLocation = useCallback(
     (locationId: string) => {
-      clearHover()
+      interrupt()
       onSelectLocation(locationId)
     },
-    [clearHover, onSelectLocation],
+    [interrupt, onSelectLocation],
   )
 
-  const hoveredId = hover && anchors.has(hover.locationId) ? hover.locationId : null
+  // A click where several markers overlap opens the chooser; otherwise it selects directly.
+  const activate = useCallback(
+    (locationId: string, pointer: PointerPosition) => {
+      const under = locationsUnder(locationId, pointer)
+      if (!under || under.locationIds.length < 2) {
+        selectLocation(locationId)
+        return
+      }
+      window.clearTimeout(hoverEndTimer.current)
+      setHover(null)
+      setChooserState({
+        groups,
+        locationIds: under.locationIds,
+        x: under.point.x,
+        y: under.point.y,
+        areaWidth: under.area.width,
+        areaHeight: under.area.height,
+      })
+    },
+    [groups, locationsUnder, selectLocation],
+  )
+
+  // No hover previews while the chooser is open.
+  const activeHover = hover && !chooser && anchors.has(hover.locationId) ? hover : null
 
   const portals = groups.map((group) => {
     const id = group.location.id
@@ -115,9 +214,18 @@ export function useArtworkMarkerLayer({
         group={group}
         appearance={appearance}
         isSelected={id === selectedLocationId}
-        isHovered={id === hoveredId}
-        placement={id === hoveredId ? hover!.placement : null}
-        onSelect={selectLocation}
+        isHovered={
+          !!activeHover?.locationIds.includes(id) || !!chooser?.locationIds.includes(id)
+        }
+        preview={
+          activeHover?.locationId === id
+            ? {
+                groups: activeHover.locationIds.map((hoveredId) => groupById.get(hoveredId)!),
+                placement: activeHover.placement,
+              }
+            : null
+        }
+        onActivate={activate}
         onHoverStart={startHover}
         onHoverEnd={endHover}
       />,
@@ -125,6 +233,19 @@ export function useArtworkMarkerLayer({
       id,
     )
   })
+
+  const overlay = chooser && (
+    <PlaceChooser
+      groups={chooser.locationIds.map((id) => groupById.get(id)!)}
+      x={chooser.x}
+      y={chooser.y}
+      areaWidth={chooser.areaWidth}
+      areaHeight={chooser.areaHeight}
+      selectedLocationId={selectedLocationId}
+      onSelect={selectLocation}
+      onClose={closeChooser}
+    />
+  )
 
   // These props must keep the same identity across renders: globe.gl destroys and
   // recreates every marker whenever `htmlElement` changes, which would detach the
@@ -141,5 +262,5 @@ export function useArtworkMarkerLayer({
     [groups, anchors],
   )
 
-  return { globeProps, portals, isHovering: hoveredId !== null, clearHover }
+  return { globeProps, portals, overlay, isHovering: activeHover !== null, interrupt }
 }

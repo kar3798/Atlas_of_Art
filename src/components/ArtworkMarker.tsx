@@ -1,6 +1,14 @@
+import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from 'react'
+import { markerCenterY, PIN_BALL_SIZE, PIN_HEIGHT, PIN_WIDTH } from '../lib/markerGeometry'
 import type { MarkerStyle } from '../styles/globeThemes'
 import type { LocationGroup } from '../types/discovery'
 import ArtworkPreview, { type PreviewPlacement } from './ArtworkPreview'
+
+/** Where the pointer was, in viewport coordinates. */
+export interface PointerPosition {
+  clientX: number
+  clientY: number
+}
 
 interface ArtworkMarkerProps {
   group: LocationGroup
@@ -8,18 +16,12 @@ interface ArtworkMarkerProps {
   appearance: MarkerStyle
   isSelected: boolean
   isHovered: boolean
-  placement: PreviewPlacement | null
-  onSelect: (locationId: string) => void
-  onHoverStart: (locationId: string, target: HTMLElement) => void
+  /** Hover preview: this marker's location, or every location under the pointer. */
+  preview: { groups: LocationGroup[]; placement: PreviewPlacement } | null
+  onActivate: (locationId: string, pointer: PointerPosition) => void
+  onHoverStart: (locationId: string, target: HTMLElement, pointer: PointerPosition) => void
   onHoverEnd: () => void
 }
-
-// Push-pin geometry (px). The needle's tip sits on the location; the ball is above it.
-const PIN_WIDTH = 12
-const PIN_HEIGHT = 22
-const PIN_BALL_SIZE = 10
-// Centre of the ball relative to the location, used to centre the hit area and preview.
-const PIN_HEAD_Y = -PIN_HEIGHT + PIN_BALL_SIZE / 2
 
 interface GlyphProps {
   active: boolean
@@ -70,23 +72,29 @@ function RegionGlyph({ active, appearance }: GlyphProps) {
   )
 }
 
+const pointerOf = (e: ReactPointerEvent | ReactMouseEvent): PointerPosition => ({
+  clientX: e.clientX,
+  clientY: e.clientY,
+})
+
 /**
- * A location marker on the globe. Pins mark specific sites; dashed rings mark broad
- * regions. Hidden from assistive technology: the panel's location list is the accessible path.
+ * A location marker on the globe, always drawn at its true position. Pins mark
+ * specific sites; dashed rings mark broad regions. Hidden from assistive technology:
+ * the panel's location list is the accessible path.
  */
 export default function ArtworkMarker({
   group,
   appearance,
   isSelected,
   isHovered,
-  placement,
-  onSelect,
+  preview,
+  onActivate,
   onHoverStart,
   onHoverEnd,
 }: ArtworkMarkerProps) {
-  const { location, artworks } = group
+  const { location, entries } = group
   const isRegion = location.precision === 'region'
-  const centerY = isRegion ? 0 : PIN_HEAD_Y
+  const centerY = markerCenterY(location.precision)
   const isActive = isSelected || isHovered
 
   return (
@@ -105,13 +113,13 @@ export default function ArtworkMarker({
         ) : (
           <PinGlyph active={isSelected} appearance={appearance} />
         )}
-        {artworks.length > 1 && (
+        {entries.length > 1 && (
           <span
             className={`absolute flex h-4 min-w-4 items-center justify-center rounded-full border border-brass/70 bg-sepia-ink px-1 text-[0.6rem] leading-none font-semibold text-brass-light ${
               isRegion ? '-top-1.5 -right-2.5' : '-top-2 left-2.5'
             }`}
           >
-            {artworks.length}
+            {entries.length}
           </span>
         )}
       </div>
@@ -120,14 +128,14 @@ export default function ArtworkMarker({
       <button
         type="button"
         tabIndex={-1}
-        onPointerEnter={(e) => e.pointerType === 'mouse' && onHoverStart(location.id, e.currentTarget)}
+        onPointerEnter={(e) => e.pointerType === 'mouse' && onHoverStart(location.id, e.currentTarget, pointerOf(e))}
         onPointerLeave={(e) => e.pointerType === 'mouse' && onHoverEnd()}
-        onClick={() => onSelect(location.id)}
+        onClick={(e) => onActivate(location.id, pointerOf(e))}
         className="pointer-events-auto absolute size-11 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full"
         style={{ left: 0, top: centerY }}
       />
 
-      {isHovered && placement && <ArtworkPreview group={group} placement={placement} centerY={centerY} />}
+      {preview && <ArtworkPreview groups={preview.groups} placement={preview.placement} centerY={centerY} />}
     </div>
   )
 }

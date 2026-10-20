@@ -1,15 +1,18 @@
+import type { Artwork, OriginCertainty } from './artwork'
 import type { SelectableCountryId } from './country'
 
 /**
  * How precisely a location is known:
- * - `site`: a documented site or city; shown as a pin.
- * - `region`: a broad area; shown as an outlined area. Its coordinates are only
- *   an approximate centre for display and never identify an exact location.
+ * - `site`: a specific documented site (e.g. a cave temple complex); shown as a pin.
+ * - `city`: a documented city, town or village; shown as a pin, but the exact
+ *   spot within it is not known.
+ * - `region`: a broad area; shown as a dashed ring and outline. Its coordinates
+ *   are only a visual anchor and never an artwork's exact location.
  */
-export type LocationPrecision = 'site' | 'region'
+export type LocationPrecision = 'site' | 'city' | 'region'
 
 export interface ArtLocation {
-  /** Stable ID shared by every artwork at this location (used for grouping). */
+  /** Stable ID shared by every artwork placed here (used for grouping). */
   id: string
   name: string
   /** Modern country, used only for navigation on the globe. */
@@ -17,45 +20,47 @@ export interface ArtLocation {
   lat: number
   lng: number
   precision: LocationPrecision
-  /** Approximate radius of a region, in degrees of arc. Regions only. */
+  /** Approximate radius of a region's outline, in degrees of arc. Regions only. */
   regionRadiusDeg?: number
-  /** Where the coordinates come from, so they can be checked or replaced. */
+  /** Where the coordinates come from. */
+  coordinateSource: string
+  /** How the coordinates should be read (approximations, visual anchors). */
   coordinateNote: string
 }
 
 /**
- * How an artwork relates to a location. Kept separate from cultural association,
- * artist nationality and depicted subject, which are different concepts.
- * - `created-in` and `found-at` require a `site` location.
- * - `associated-with-region` requires a `region` location.
+ * How an artwork relates to a location, according to the cited evidence.
+ * Kept separate from cultural association, artist nationality and depicted subject.
+ * - `created-in` / `found-at` need a `site` or `city`.
+ * - `associated-with` is a documented attribution without a stated place of
+ *   creation or discovery; it is the only relationship allowed for a `region`.
  */
-export type LocationRelationship = 'created-in' | 'found-at' | 'associated-with-region'
+export type LocationRelationship = 'created-in' | 'found-at' | 'associated-with'
 
-/** An artwork placed on the globe. Demo records and verified museum records share this shape. */
-export interface MappedArtwork {
-  id: string
-  title: string
-  /** Date or period as recorded, or null if unknown. */
-  date: string | null
-  /** Artist, if known. */
-  creator: string | null
-  /** Cultural association, if recorded. */
-  culture: string | null
-  /** Medium or artwork category. */
-  category: string | null
-  placement: { locationId: string; relationship: LocationRelationship }
-  /** Short description from a verified source; null shows a placeholder. */
-  description: string | null
-  /** Licensed image; null shows a CSS placeholder. */
-  image: { url: string; alt: string; license: string } | null
-  /** Official museum source; null for demo records (no links are invented). */
-  source: { museum: string; recordUrl: string; accessionNumber: string; creditLine: string } | null
-  /** True for synthetic demonstration content. */
-  isDemo: boolean
+/** Researched geographic placement of one museum artwork. */
+export interface ArtworkPlacement {
+  /** Matches `Artwork.id` in artworks.json. */
+  artworkId: string
+  /** Matches `Artwork.source.accessionNumber`; checked by the validator. */
+  accessionNumber: string
+  locationId: string
+  relationship: LocationRelationship
+  /** Mirrors the source's own qualifier ("probably", "reportedly", …). */
+  certainty: OriginCertainty
+  /** The evidence for the placement: which source field, what it says, and where. */
+  evidence: { field: 'culture' | 'description' | 'citations'; text: string; sourceUrl: string }
+  /** Short explanation of uncertainty or approximation. */
+  note: string
+}
+
+/** An artwork together with its researched placement. */
+export interface PlacedArtwork {
+  artwork: Artwork
+  placement: ArtworkPlacement
 }
 
 /** One marker on the globe: a location with every artwork placed there. */
 export interface LocationGroup {
   location: ArtLocation
-  artworks: MappedArtwork[]
+  entries: PlacedArtwork[]
 }
